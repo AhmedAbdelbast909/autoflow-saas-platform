@@ -1,0 +1,3 @@
+
+[orchestrator] TIMEOUT killing opencode process
+{"type":"error","timestamp":1788581229460,"sessionID":"ses_f90404f4cffeJzI59KCLOUV0CK","error":{"name":"UnknownError","data":{"message":"Unexpected server error. Check server logs for details.","ref":"err_b959d089"}}}

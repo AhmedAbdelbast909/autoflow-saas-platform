@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowSync — تطبيق إدارة المهام الذكي</title>
+  <meta name="description" content="FlowSync تطبيق ذكي لإدارة المهام والمشاريع بسلاسة. حمّل التطبيق الآن على iOS و Android.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header id="navbar" class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="url(#g1)"/>
+            <path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#10b981"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span class="brand-name">FlowSync</span>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#features">المميزات</a>
+        <a href="#how">كيف يعمل</a>
+        <a href="#testimonials">آراء العملاء</a>
+        <a href="#pricing">الأسعار</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#download" class="btn btn-ghost">تسجيل الدخول</a>
+        <a href="#download" class="btn btn-accent">حمّل مجاناً</a>
+      </div>
+
+      <button class="mobile-toggle" id="mobileToggle" aria-label="فتح القائمة">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="pill">
+          <span class="pill-dot"></span>
+          جديد — الإصدار 3.0 أصبح متاحاً
+        </div>
+        <h1>نظّم يومك.<br><span class="highlight">أنجز أكثر.</span></h1>
+        <p class="hero-sub">تطبيق ذكي لإدارة مهامك ومشاريعك بسلاسة تامة. تعاون مع فريقك وتابع تقدمك لحظة بلحظة، من أي مكان.</p>
+        
+        <div class="hero-cta">
+          <a href="#download" class="btn btn-accent btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            حمّل التطبيق مجاناً
+          </a>
+          <a href="#how" class="btn btn-outline btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            شاهد الفيديو
+          </a>
+        </div>
+
+        <div class="hero-trust">
+          <div class="avatar-stack">
+            <div class="avatar" style="background: linear-gradient(135deg, #f472b6, #a855f7);">أ</div>
+            <div class="avatar" style="background: linear-gradient(135deg, #38bdf8, #6366f1);">م</div>
+            <div class="avatar" style="background: linear-gradient(135deg, #34d399, #06b6d4);">ع</div>
+            <div class="avatar" style="background: linear-gradient(135deg, #fbbf24, #f97316);">ن</div>
+          </div>
+          <p><strong>+25,000</strong> مستخدم يثقون بنا</p>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="phone-mockup">
+          <div class="phone-screen">
+            <div class="app-header-mock">
+              <div class="app-greeting">مرحباً، أحمد 👋</div>
+              <div class="app-date">الخميس، 20 أغسطس</div>
+            </div>
+            <div class="app-stats-mock">
+              <div class="mini-stat done"><span class="mini-num">12</span><span class="mini-label">مكتمل</span></div>
+              <div class="mini-stat pending"><span class="mini-num">5</span><span class="mini-label">قيد التنفيذ</span></div>
+              <div class="mini-stat upcoming"><span class="mini-num">8</span><span class="mini-label">قادم</span></div>
+            </div>
+            <div class="app-tasks-mock">
+              <div class="task-item">
+                <div class="task-check checked"></div>
+                <div class="task-info">
+                  <span class="task-name">تصميم واجهة المستخدم</span>
+                  <span class="task-tag tag-design">تصميم</span>
+                </div>
+              </div>
+              <div class="task-item">
+                <div class="task-check checked"></div>
+                <div class="task-info">
+                  <span class="task-name">مراجعة الكود البرمجي</span>
+                  <span class="task-tag tag-dev">تطوير</span>
+                </div>
+              </div>
+              <div class="task-item active">
+                <div class="task-check"></div>
+                <div class="task-info">
+                  <span class="task-name">اجتماع الفريق الأسبوعي</span>
+                  <span class="task-tag tag-meeting">اجتماع</span>
+                </div>
+              </div>
+              <div class="task-item">
+                <div class="task-check"></div>
+                <div class="task-info">
+                  <span class="task-name">كتابة المحتوى التسويقي</span>
+                  <span class="task-tag tag-content">محتوى</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="floating-card card-1">
+          <div class="fc-icon">📊</div>
+          <div><strong>إنتاجيتك</strong><br><span class="fc-val up">+42%</span> هذا الأسبوع</div>
+        </div>
+        <div class="floating-card card-2">
+          <div class="fc-icon">🔔</div>
+          <div><strong>تذكير</strong><br>اجتماع بعد 15 دقيقة</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">لماذا FlowSync؟</span>
+        <h2>أدوات ذكية تجعل عملك أسهل</h2>
+        <p>كل ما تحتاجه لإدارة مهامك ومشاريعك في مكان واحد.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="--icon-bg: rgba(16, 185, 129, 0.12); --icon-color: #10b981;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>أداء خارق</h3>
+          <p>تطبيق خفيف وسريع يعمل بسلاسة على جميع الأجهزة بدون أي تأخير.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="--icon-bg: rgba(99, 102, 241, 0.12); --icon-color: #6366f1;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h3>تعاون الفريق</h3>
+          <p>شارك المهام مع أعضاء فريقك وتابع التقدم بتحديثات لحظية.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="--icon-bg: rgba(244, 114, 182, 0.12); --icon-color: #f472b6;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <h3>لوحة تحكم بصرية</h3>
+          <p>تابع مشاريعك بعرض Kanban أو تقويم أو قائمة حسب تفضيلك.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="--icon-bg: rgba(251, 191, 36, 0.12); --icon-color: #fbbf24;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>تذكيرات ذكية</h3>
+          <p>لن تنسى أي مهمة. تذكيرات مخصصة بالوقت والموقع والأولوية.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="--icon-bg: rgba(6, 182, 212, 0.12); --icon-color: #06b6d4;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>خصوصية كاملة</h3>
+          <p>بياناتك مشفرة بالكامل. لا نبيع ولا نشارك معلوماتك أبداً.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon-wrap" style="--icon-bg: rgba(168, 85, 247, 0.12); --icon-color: #a855f7;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>تقارير وتحليلات</h3>
+          <p>إحصائيات دقيقة عن إنتاجيتك وأداء فريقك مع رسوم بيانية تفاعلية.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how" class="how-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">كيف يعمل؟</span>
+        <h2>ثلاث خطوات فقط لتبدأ</h2>
+        <p>ابدأ في دقائق معدودة واستمتع بإدارة مهامك بطريقة أذكى.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <div class="step-content">
+            <h3>حمّل التطبيق</h3>
+            <p>حمّل FlowSync مجاناً من App Store أو Google Play وأنشئ حسابك في ثوانٍ.</p>
+          </div>
+        </div>
+        <div class="step-connector">
+          <svg width="40" height="20"><path d="M0 10h40" stroke="#10b981" stroke-width="2" stroke-dasharray="4"/></svg>
+        </div>
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <div class="step-content">
+            <h3>أضف مهامك</h3>
+            <p>أنشئ مشاريعك وأضف مهامك بسهولة. حدد الأولويات والمواعيد النهائية.</p>
+          </div>
+        </div>
+        <div class="step-connector">
+          <svg width="40" height="20"><path d="M0 10h40" stroke="#10b981" stroke-width="2" stroke-dasharray="4"/></svg>
+        </div>
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <div class="step-content">
+            <h3>تابع وأنجز</h3>
+            <p>تتبع تقدمك واحصل على تقارير أسبوعية لتحسين إنتاجيتك باستمرار.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" class="testimonials-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">آراء العملاء</span>
+        <h2>يثق بنا الآلاف حول العالم العربي</h2>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"أفضل تطبيق لإدارة المهام استخدمته. واجهة بسيطة وأنيقة وسريعة جداً. أنصح به بشدة!"</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar" style="background: linear-gradient(135deg, #34d399, #06b6d4);">س</div>
+            <div>
+              <strong>سارة المنصوري</strong>
+              <span>مديرة مشاريع</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"غيّر طريقة عمل فريقنا بالكامل. التعاون أصبح أسهل والإنتاجية تضاعفت فعلاً."</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar" style="background: linear-gradient(135deg, #6366f1, #a855f7);">ع</div>
+            <div>
+              <strong>عمر الشريف</strong>
+              <span>مؤسس شركة تقنية</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="stars">★★★★★</div>
+          <p>"التذكيرات الذكية وحدها تستحق التطبيق. لم أعد أنسى أي مهمة أو موعد مهم."</p>
+          <div class="reviewer">
+            <div class="reviewer-avatar" style="background: linear-gradient(135deg, #f472b6, #f97316);">ن</div>
+            <div>
+              <strong>نورة العتيبي</strong>
+              <span>مصممة UX</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-badge">الأسعار</span>
+        <h2>خطط مرنة تناسب الجميع</h2>
+        <p>ابدأ مجاناً وترقّ عندما تحتاج للمزيد.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-header">
+            <h3>مجاني</h3>
+            <p class="price-desc">للاستخدام الشخصي</p>
+          </div>
+          <div class="price-amount">
+            <span class="currency">$</span><span class="amount">0</span><span class="period">/شهرياً</span>
+          </div>
+          <ul class="price-features">
+            <li>✓ حتى 20 مهمة نشطة</li>
+            <li>✓ مشروعين كحد أقصى</li>
+            <li>✓ تذكيرات أساسية</li>
+            <li>✓ تطبيق موبايل</li>
+            <li class="disabled">✗ تعاون الفريق</li>
+            <li class="disabled">✗ تقارير متقدمة</li>
+          </ul>
+          <a href="#download" class="btn btn-outline btn-full">ابدأ مجاناً</a>
+        </div>
+
+        <div class="price-card popular">
+          <div class="popular-badge">الأكثر شعبية</div>
+          <div class="price-header">
+            <h3>بريميوم</h3>
+            <p class="price-desc">للمحترفين والفرق الصغيرة</p>
+          </div>
+          <div class="price-amount">
+            <span class="currency">$</span><span class="amount">9</span><span class="period">/شهرياً</span>
+          </div>
+          <ul class="price-features">
+            <li>✓ مهام غير محدودة</li>
+            <li>✓ مشاريع غير محدودة</li>
+            <li>✓ تذكيرات ذكية متقدمة</li>
+            <li>✓ تعاون حتى 10 أعضاء</li>
+            <li>✓ تقارير وتحليلات</li>
+            <li>✓ دعم فني أولوي</li>
+          </ul>
+          <a href="#download" class="btn btn-accent btn-full">ابدأ تجربة مجانية</a>
+        </div>
+
+        <div class="price-card">
+          <div class="price-header">
+            <h3>المؤسسات</h3>
+            <p class="price-desc">للشركات والفرق الكبيرة</p>
+          </div>
+          <div class="price-amount">
+            <span class="currency">$</span><span class="amount">29</span><span class="period">/شهرياً</span>
+          </div>
+          <ul class="price-features">
+            <li>✓ كل مميزات بريميوم</li>
+            <li>✓ أعضاء غير محدودين</li>
+            <li>✓ SSO تسجيل دخول موحد</li>
+            <li>✓ API مخصص</li>
+            <li>✓ مدير حساب مخصص</li>
+            <li>✓ SLA ضمان الجودة</li>
+          </ul>
+          <a href="#download" class="btn btn-outline btn-full">تواصل معنا</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download CTA -->
+  <section id="download" class="download-section">
+    <div class="container">
+      <div class="download-box">
+        <h2>حمّل التطبيق الآن وابدأ رحلتك</h2>
+        <p>متاح على iOS و Android مجاناً. لا تحتاج بطاقة ائتمانية.</p>
+        <div class="download-buttons">
+          <a href="#" class="store-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <div>
+              <small>حمّل من</small>
+              <strong>App Store</strong>
+            </div>
+          </a>
+          <a href="#" class="store-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.69c-.41-.2-.68-.63-.68-1.12V1.43c0-.49.27-.92.68-1.12L14.54 12 3.18 23.69zm1.4.73l12.6-7.25-2.77-2.77L4.58 24.42zm0-24.84L16.4 9.6l2.78-2.77L4.58-.42zm17.15 11.05l-3.38-1.95-3.04 3.04 3.04 3.04 3.38-1.95c.6-.35.6-1.83 0-2.18z"/></svg>
+            <div>
+              <small>حمّل من</small>
+              <strong>Google Play</strong>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+              <rect width="28" height="28" rx="8" fill="url(#g2)"/>
+              <path d="M8 14l4 4 8-8" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <defs><linearGradient id="g2" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#10b981"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+            </svg>
+          </div>
+          <span class="brand-name">FlowSync</span>
+        </div>
+        <p class="footer-desc">تطبيقك الذكي لإدارة المهام والإنتاجية. بسيط. قوي. فعّال.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>المنتج</h4>
+          <a href="#">المميزات</a>
+          <a href="#">الأسعار</a>
+          <a href="#">ما الجديد</a>
+        </div>
+        <div class="footer-col">
+          <h4>الدعم</h4>
+          <a href="#">مركز المساعدة</a>
+          <a href="#">تواصل معنا</a>
+          <a href="#">الأسئلة الشائعة</a>
+        </div>
+        <div class="footer-col">
+          <h4>الشركة</h4>
+          <a href="#">عن FlowSync</a>
+          <a href="#">المدونة</a>
+          <a href="#">الوظائف</a>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>© 2026 FlowSync. جميع الحقوق محفوظة.</p>
+      <div class="footer-legal">
+        <a href="#">سياسة الخصوصية</a>
+        <a href="#">الشروط والأحكام</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

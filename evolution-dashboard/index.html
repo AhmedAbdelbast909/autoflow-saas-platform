@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evolution API — Enterprise Studio & Command Center</title>
+  <meta name="description" content="Next-Generation Enterprise Dashboard for Evolution API v2.3.7 - WhatsApp Automation, High Availability, Live Metrics and Instance Management.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Top Background Aurora Glows -->
+  <div class="aurora-glow glow-1"></div>
+  <div class="aurora-glow glow-2"></div>
+
+  <!-- App Wrapper -->
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <div class="logo-icon-wrapper">
+            <i class="fa-brands fa-whatsapp logo-icon"></i>
+            <span class="pulse-dot"></span>
+          </div>
+          <div class="brand-text">
+            <h2>Evolution <span class="accent-text">Enterprise</span></h2>
+            <div class="version-tag">
+              <span class="badge-dot"></span>
+              v2.3.7 Enhanced
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="nav-category">CORE PLATFORM</div>
+        <button class="nav-item active" data-tab="instances">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          <span>WhatsApp Instances</span>
+          <span class="nav-counter" id="instanceCountBadge">0</span>
+        </button>
+        <button class="nav-item" data-tab="messages">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Message Studio</span>
+        </button>
+        <button class="nav-item" data-tab="health">
+          <i class="fa-solid fa-heart-pulse"></i>
+          <span>Health & SRE Metrics</span>
+          <span class="status-indicator-live">Live</span>
+        </button>
+
+        <div class="nav-category">ENTERPRISE & AUDIT</div>
+        <button class="nav-item" data-tab="journal">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Event Journal & Audit</span>
+        </button>
+        <button class="nav-item" data-tab="integrations">
+          <i class="fa-solid fa-network-wired"></i>
+          <span>Webhooks & Integrations</span>
+        </button>
+        <button class="nav-item" data-tab="api-explorer">
+          <i class="fa-solid fa-terminal"></i>
+          <span>Live API Explorer</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="connection-status-card">
+          <div class="status-row">
+            <span class="status-light connected" id="connectionLight"></span>
+            <span class="status-label" id="connectionLabel">Backend Connected</span>
+          </div>
+          <div class="latency-row">
+            <span>Latency: <strong id="pingLatency">18 ms</strong></span>
+            <span class="db-status-badge"><i class="fa-solid fa-database"></i> Postgres</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="pageTitle">WhatsApp Instances</h1>
+          <p class="page-subtitle" id="pageSubtitle">Manage connected phone numbers, generate QR codes, and supervise session health.</p>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Connection Settings Dropdown -->
+          <div class="api-credentials-bar">
+            <div class="input-with-icon">
+              <i class="fa-solid fa-link"></i>
+              <input type="text" id="apiUrlInput" value="http://localhost:8080" placeholder="API Server URL" title="Evolution API Endpoint">
+            </div>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-key"></i>
+              <input type="password" id="apiKeyInput" value="evolution_secret_key_123456" placeholder="Global API Key" title="AUTHENTICATION_API_KEY">
+            </div>
+            <button class="btn btn-secondary" id="saveCredentialsBtn" title="Test and Save Connection">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Test Connection</span>
+            </button>
+          </div>
+
+          <button class="btn btn-primary" id="openCreateModalBtn">
+            <i class="fa-solid fa-plus"></i>
+            <span>Create Instance</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- KPI Summary Bar -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">ACTIVE SESSIONS</span>
+            <i class="fa-solid fa-circle-check kpi-icon green"></i>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiActiveInstances">0</div>
+            <span class="kpi-subtext" id="kpiTotalInstances">0 Total Instances Created</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">DATABASE READINESS</span>
+            <i class="fa-solid fa-database kpi-icon blue"></i>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiDbStatus">Healthy</div>
+            <span class="kpi-subtext" id="kpiDbLatency">Latency: 45ms (PostgreSQL)</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">MESSAGE RELIABILITY</span>
+            <i class="fa-solid fa-shield-check kpi-icon emerald"></i>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value">Zero-Loss</div>
+            <span class="kpi-subtext">Durable Journal & Idempotency Active</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span class="kpi-title">HIGH AVAILABILITY</span>
+            <i class="fa-solid fa-bolt kpi-icon purple"></i>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiUptime">99.99%</div>
+            <span class="kpi-subtext">Session Lease & Redis Cluster Guard</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 1: Instances Tab -->
+      <section class="tab-panel active" id="tab-instances">
+        <div class="section-toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInstanceInput" placeholder="Filter by instance name or status...">
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn btn-outline" id="refreshInstancesBtn">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Refresh List</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Instances Grid Container -->
+        <div class="instances-grid" id="instancesContainer">
+          <!-- Dynamic instances inserted by app.js -->
+        </div>
+
+        <!-- Empty State Fallback -->
+        <div class="empty-state" id="emptyInstancesState" style="display: none;">
+          <div class="empty-icon-wrap">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+          </div>
+          <h3>No WhatsApp Instances Found</h3>
+          <p>Create your first instance to generate a QR Code and connect your WhatsApp account.</p>
+          <button class="btn btn-primary" onclick="document.getElementById('openCreateModalBtn').click()">
+            <i class="fa-solid fa-plus"></i> Create First Instance
+          </button>
+        </div>
+      </section>
+
+      <!-- Tab 2: Message Studio Tab -->
+      <section class="tab-panel" id="tab-messages">
+        <div class="studio-layout">
+          <div class="studio-form-card">
+            <h3><i class="fa-solid fa-paper-plane accent-text"></i> Interactive Message Dispatcher</h3>
+            <p class="card-desc">Send WhatsApp messages, media, audio, buttons, and documents directly through your active instances.</p>
+
+            <form id="sendMessageForm">
+              <div class="form-group">
+                <label for="messageInstanceSelect">Select Target Instance:</label>
+                <select id="messageInstanceSelect" class="form-control" required>
+                  <option value="">-- No instances available --</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="recipientNumberInput">Recipient Phone Number (with Country Code):</label>
+                <div class="input-with-icon">
+                  <i class="fa-solid fa-phone"></i>
+                  <input type="text" id="recipientNumberInput" class="form-control" placeholder="e.g. 201012345678 or 14155552671" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="messageTypeSelect">Message Type:</label>
+                <select id="messageTypeSelect" class="form-control">
+                  <option value="text">Plain Text Message</option>
+                  <option value="image">Image with Caption</option>
+                  <option value="buttons">Interactive Buttons (Meta Compatible)</option>
+                  <option value="audio">Voice Audio Note (PTT)</option>
+                </select>
+              </div>
+
+              <div class="form-group" id="mediaUrlGroup" style="display: none;">
+                <label for="mediaUrlInput">Media File URL:</label>
+                <input type="url" id="mediaUrlInput" class="form-control" placeholder="https://example.com/sample.jpg">
+              </div>
+
+              <div class="form-group">
+                <label for="messageTextInput">Message Content:</label>
+                <textarea id="messageTextInput" class="form-control" rows="4" placeholder="Hello from Evolution Enterprise! This message was dispatched via API." required></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="dispatchMessageBtn">
+                  <i class="fa-solid fa-paper-plane"></i>
+                  <span>Dispatch Message</span>
+                </button>
+                <button type="reset" class="btn btn-secondary">Clear</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Live WhatsApp Preview Card -->
+          <div class="phone-preview-card">
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-header">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="contact-info">
+                  <span class="name" id="previewRecipient">WhatsApp Contact</span>
+                  <span class="status">online</span>
+                </div>
+              </div>
+              <div class="phone-chat-body" id="phoneChatBody">
+                <div class="chat-bubble incoming">
+                  <span>Hello! Welcome to Evolution API Enterprise.</span>
+                  <span class="time">12:00 PM</span>
+                </div>
+                <div class="chat-bubble outgoing" id="liveBubblePreview">
+                  <span id="previewMessageText">Type a message to see a live simulation...</span>
+                  <span class="time" id="previewTime">Just now</span>
+                  <i class="fa-solid fa-check-double read-check"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 3: Health & Metrics Tab -->
+      <section class="tab-panel" id="tab-health">
+        <div class="health-overview-grid">
+          <div class="health-card">
+            <h3><i class="fa-solid fa-gauge-high accent-text"></i> Core Subsystems Health</h3>
+            <div class="health-check-list" id="healthSubsystemsList">
+              <div class="check-row">
+                <span class="check-title"><i class="fa-solid fa-server"></i> API Gateway (HTTP/2)</span>
+                <span class="badge badge-success">200 OK — Healthy</span>
+              </div>
+              <div class="check-row">
+                <span class="check-title"><i class="fa-solid fa-database"></i> PostgreSQL Primary</span>
+                <span class="badge badge-success" id="healthDbBadge">Healthy (45ms)</span>
+              </div>
+              <div class="check-row">
+                <span class="check-title"><i class="fa-solid fa-bolt"></i> Redis Session Storage</span>
+                <span class="badge badge-success">Connected</span>
+              </div>
+              <div class="check-row">
+                <span class="check-title"><i class="fa-solid fa-shield-halved"></i> Distributed Tracing & ID</span>
+                <span class="badge badge-success">Tracing Active</span>
+              </div>
+              <div class="check-row">
+                <span class="check-title"><i class="fa-solid fa-repeat"></i> Idempotency Protection</span>
+                <span class="badge badge-success">Zero Duplication Active</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="health-card">
+            <h3><i class="fa-solid fa-chart-line accent-text"></i> SLO Service Level Targets</h3>
+            <div class="slo-meter-wrap">
+              <div class="slo-item">
+                <div class="slo-label">
+                  <span>Message Ingestion Latency (p95 &lt; 500ms)</span>
+                  <strong class="green-text">142 ms</strong>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" style="width: 28%;"></div></div>
+              </div>
+              <div class="slo-item">
+                <div class="slo-label">
+                  <span>Webhook Delivery Success Rate (&gt; 99.5%)</span>
+                  <strong class="green-text">99.98%</strong>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" style="width: 99%;"></div></div>
+              </div>
+              <div class="slo-item">
+                <div class="slo-label">
+                  <span>Crash Recovery RTO (&lt; 30s)</span>
+                  <strong class="green-text">4.2 s</strong>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" style="width: 15%;"></div></div>
+              </div>
+              <div class="slo-item">
+                <div class="slo-label">
+                  <span>Acceptable Event Loss Target</span>
+                  <strong class="green-text">0.00% (Zero Loss)</strong>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" style="width: 100%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 4: Event Journal Tab -->
+      <section class="tab-panel" id="tab-journal">
+        <div class="journal-card">
+          <div class="journal-header">
+            <div>
+              <h3><i class="fa-solid fa-shield-halved accent-text"></i> Durable Event Journal & Audit Stream</h3>
+              <p class="card-desc">Full audit trail of state transitions, tenant boundaries, and message delivery proofs.</p>
+            </div>
+            <button class="btn btn-secondary" id="clearJournalBtn">
+              <i class="fa-solid fa-trash"></i> Clear Stream View
+            </button>
+          </div>
+
+          <div class="console-terminal" id="journalTerminal">
+            <div class="log-line info">
+              <span class="log-time">[SYSTEM]</span>
+              <span class="log-tag">INIT</span>
+              <span class="log-msg">Evolution API Enterprise Command Center started. Connecting to event stream...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 5: Webhooks & Integrations Tab -->
+      <section class="tab-panel" id="tab-integrations">
+        <div class="integrations-grid">
+          <!-- n8n Integration Card -->
+          <div class="integration-card">
+            <div class="int-icon n8n"><i class="fa-solid fa-diagram-project"></i></div>
+            <h4>n8n Workflow Automation</h4>
+            <p>Stream incoming messages and triggers automatically to your local or cloud n8n webhook nodes.</p>
+            <div class="int-status"><span class="badge badge-success">Supported</span></div>
+          </div>
+
+          <!-- Typebot Card -->
+          <div class="integration-card">
+            <div class="int-icon typebot"><i class="fa-solid fa-robot"></i></div>
+            <h4>Typebot Chatbots</h4>
+            <p>Connect conversational flow chatbots with rich buttons, lists, and audio responses.</p>
+            <div class="int-status"><span class="badge badge-success">Native Driver</span></div>
+          </div>
+
+          <!-- Chatwoot Card -->
+          <div class="integration-card">
+            <div class="int-icon chatwoot"><i class="fa-solid fa-headset"></i></div>
+            <h4>Chatwoot Omnichannel</h4>
+            <p>Live human customer service inbox for multi-agent support and conversations handover.</p>
+            <div class="int-status"><span class="badge badge-success">Native Driver</span></div>
+          </div>
+
+          <!-- Supabase / S3 Card -->
+          <div class="integration-card">
+            <div class="int-icon storage"><i class="fa-solid fa-cloud"></i></div>
+            <h4>S3 / MinIO / Supabase Storage</h4>
+            <p>Store audios, videos, documents, and heavy media in durable cloud object storage.</p>
+            <div class="int-status"><span class="badge badge-success">Ready</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 6: API Explorer Tab -->
+      <section class="tab-panel" id="tab-api-explorer">
+        <div class="api-explorer-card">
+          <div class="explorer-header">
+            <h3><i class="fa-solid fa-terminal accent-text"></i> Live API Endpoint Tester</h3>
+            <p class="card-desc">Execute real REST requests against your local Evolution API engine with headers automatically injected.</p>
+          </div>
+
+          <div class="request-builder-row">
+            <select id="apiMethodSelect" class="form-control method-select">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <input type="text" id="apiEndpointInput" class="form-control endpoint-input" value="/instance/fetchInstances" placeholder="/instance/fetchInstances">
+            <button class="btn btn-primary" id="executeApiBtn">
+              <i class="fa-solid fa-play"></i>
+              <span>Send Request</span>
+            </button>
+          </div>
+
+          <div class="response-viewer">
+            <div class="viewer-header">
+              <span>RESPONSE STATUS: <strong id="apiStatusBadge">200 OK</strong></span>
+              <span id="apiLatencyBadge">Response Time: 22ms</span>
+            </div>
+            <pre class="json-code" id="apiResponseJson">Click "Send Request" to test any endpoint...</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: Create Instance -->
+  <div class="modal-backdrop" id="createInstanceModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-plus accent-text"></i> Create WhatsApp Instance</h3>
+        <button class="close-modal-btn" onclick="document.getElementById('createInstanceModal').classList.remove('active')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="createInstanceForm">
+          <div class="form-group">
+            <label for="newInstanceName">Instance Name:</label>
+            <input type="text" id="newInstanceName" class="form-control" placeholder="e.g. sales-line-1 or support" required pattern="[A-Za-z0-9-_]+" title="Alphanumeric, hyphens and underscores only">
+            <small class="form-hint">Unique identifier for this WhatsApp connection.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="newInstanceToken">Custom Instance Token (Optional):</label>
+            <input type="text" id="newInstanceToken" class="form-control" placeholder="Leave blank to auto-generate">
+          </div>
+
+          <div class="form-group">
+            <label for="newInstanceProvider">Connection Provider:</label>
+            <select id="newInstanceProvider" class="form-control">
+              <option value="baileys">WhatsApp Web (Baileys — Free & QR Code)</option>
+              <option value="meta">Meta Cloud API (Official Business API)</option>
+            </select>
+          </div>
+
+          <div class="checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="rejectCallsCheckbox" checked>
+              <span class="checkmark"></span>
+              Reject Incoming Calls Automatically
+            </label>
+          </div>
+
+          <div class="checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="readMessagesCheckbox">
+              <span class="checkmark"></span>
+              Mark Messages as Read Automatically
+            </label>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('createInstanceModal').classList.remove('active')">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="submitCreateInstanceBtn">
+              <i class="fa-solid fa-check"></i> Create & Connect
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: QR Code Connect Modal -->
+  <div class="modal-backdrop" id="qrModal">
+    <div class="modal-dialog qr-modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-qrcode accent-text"></i> Connect WhatsApp Phone</h3>
+        <button class="close-modal-btn" onclick="document.getElementById('qrModal').classList.remove('active')">&times;</button>
+      </div>
+      <div class="modal-body qr-modal-body">
+        <div class="qr-step-instructions">
+          <ol>
+            <li>Open <strong>WhatsApp</strong> on your phone.</li>
+            <li>Tap <strong>Settings</strong> or <strong>Three Dots</strong> &gt; <strong>Linked Devices</strong>.</li>
+            <li>Tap <strong>Link a Device</strong> and scan the QR code below:</li>
+          </ol>
+        </div>
+
+        <div class="qr-container-wrapper">
+          <div class="qr-box" id="qrImageBox">
+            <div class="qr-loader" id="qrLoader">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+              <span>Generating Secure QR...</span>
+            </div>
+            <img id="qrCodeImg" src="" alt="WhatsApp QR Code" style="display: none;">
+          </div>
+          <div class="qr-status-indicator" id="qrStatusText">Waiting for scan...</div>
+        </div>
+
+        <div class="pairing-code-section" id="pairingSection">
+          <span class="pairing-label">Or connect via 8-Digit Pairing Code:</span>
+          <div class="pairing-code-box">
+            <code id="pairingCodeDisplay">------</code>
+            <button class="btn btn-sm btn-secondary" id="copyPairingBtn" title="Copy code">
+              <i class="fa-solid fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

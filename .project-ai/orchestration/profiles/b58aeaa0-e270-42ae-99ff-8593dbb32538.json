@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "profileId": "b58aeaa0-e270-42ae-99ff-8593dbb32538",
+  "projectId": "c:\\Users\\ahmed\\Desktop\\auto",
+  "workspaceRoot": "c:\\Users\\ahmed\\Desktop\\auto",
+  "generatedAt": "2026-08-20T19:21:10.903Z",
+  "technologyStack": [],
+  "architectureSummary": "Unnamed project; bounded repository profile with top-level areas: ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\events\\events.jsonl, ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\state.json, ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\state.json.21548.c2bf229d-cb93-40f6-b61c-13251edcebcd.tmp, ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\supervisor.json, ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\workflows\\e72c8e7a-611e-4351-9a3b-c604b61c4268.events.jsonl, ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\workflows\\e72c8e7a-611e-4351-9a3b-c604b61c4268.json, ..\\..\\..\\..\\Desktop\\auto\\.project-ai\\workflows\\supervisor.events.jsonl, ..\\..\\..\\..\\Desktop\\auto\\index.html, ..\\..\\..\\..\\Desktop\\auto\\landing2\\index.html, ..\\..\\..\\..\\Desktop\\auto\\script.js, ..\\..\\..\\..\\Desktop\\auto\\style.css.",
+  "conventions": [],
+  "buildCommands": [],
+  "testCommands": [],
+  "lintCommands": [],
+  "typecheckCommands": [],
+  "apiSurface": [],
+  "projectRisks": [
+    "No package scripts were detected; project commands may require user input.",
+    "No test-like files were detected within the bounded inspection."
+  ],
+  "relevantTools": [
+    "READ_WORKSPACE",
+    "GIT_READ"
+  ],
+  "relevantIntegrations": [],
+  "gitState": {
+    "dirty": false,
+    "worktrees": []
+  },
+  "inspectedPaths": [
+    ".project-ai\\events\\events.jsonl",
+    ".project-ai\\state.json",
+    ".project-ai\\state.json.21548.c2bf229d-cb93-40f6-b61c-13251edcebcd.tmp",
+    ".project-ai\\supervisor.json",
+    ".project-ai\\workflows\\e72c8e7a-611e-4351-9a3b-c604b61c4268.events.jsonl",
+    ".project-ai\\workflows\\e72c8e7a-611e-4351-9a3b-c604b61c4268.json",
+    ".project-ai\\workflows\\supervisor.events.jsonl",
+    "index.html",
+    "landing2\\index.html",
+    "script.js",
+    "style.css"
+  ],
+  "confidence": 0.55
+}

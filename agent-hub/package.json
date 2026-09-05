@@ -1,0 +1,40 @@
+{
+  "name": "agent-hub-cli",
+  "version": "1.0.0",
+  "description": "Unified Multi-Agent Orchestrator & CLI Launcher for Claude, Codex, Grok, AGY, OpenCode, and Kimi",
+  "type": "module",
+  "bin": {
+    "hub": "./bin/hub.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node ./bin/hub.js"
+  },
+  "keywords": [
+    "ai",
+    "orchestrator",
+    "claude",
+    "codex",
+    "grok",
+    "agy",
+    "opencode",
+    "kimi",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@inquirer/prompts": "^7.2.1",
+    "boxen": "^8.0.1",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "dotenv": "^16.4.7",
+    "execa": "^9.5.2",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3"
+  }
+}

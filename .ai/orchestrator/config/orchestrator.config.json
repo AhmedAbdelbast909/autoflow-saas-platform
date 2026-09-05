@@ -1,0 +1,36 @@
+{
+  "orchestrator": {
+    "maxFixCycles": 5,
+    "maxModelAttempts": 3,
+    "maxReviewCycles": 5,
+    "maxConsecutiveFailures": 5,
+    "modelCooldownMs": 900000,
+    "openCodeTimeoutMs": 1800000,
+    "reviewerTimeoutMs": 600000,
+    "autoCommit": false
+  },
+  "coding": {
+    "models": [
+      { "id": "coding-primary", "provider": "opencode", "model": "opencode/nemotron-3-ultra-free", "priority": 1, "enabled": true },
+      { "id": "coding-secondary", "provider": "opencode", "model": "opencode/glm-5.3-flash", "priority": 2, "enabled": true },
+      { "id": "coding-tertiary", "provider": "opencode", "model": "opencode/deepseek-v4-flash", "priority": 3, "enabled": true }
+    ]
+  },
+  "review": {
+    "provider": "deepseek",
+    "model": "deepseek/deepseek-reasoner",
+    "executable": "deepseek-harness",
+    "args": ["review", "--format", "json"],
+    "timeoutMs": 600000
+  },
+  "quality": { "typecheck": true, "lint": true, "tests": true, "build": true, "projectDir": "taskflow-saas" },
+  "git": { "autoCommit": false },
+  "certification": {
+    "maxP0": 0,
+    "maxP1": 0,
+    "requireTestsPass": true,
+    "requireTypecheckPass": true,
+    "requireLintPass": true,
+    "requireBuildPass": true
+  }
+}

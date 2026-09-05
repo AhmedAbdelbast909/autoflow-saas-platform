@@ -1,0 +1,20 @@
+{
+  "name": "ai-coding-orchestrator",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Autonomous AI coding orchestrator: OpenCode implementer + model fallback + quality gates + DeepSeek reviewer",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/*.test.js",
+    "orchestrator": "node dist/src/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3"
+  }
+}

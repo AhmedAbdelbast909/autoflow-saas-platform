@@ -1,0 +1,58 @@
+{
+  "workflowId": "e72c8e7a-611e-4351-9a3b-c604b61c4268",
+  "status": "paused",
+  "runState": "PAUSED",
+  "requestId": "8a469d6b-c395-4e33-9405-91c4944ff399",
+  "plan": {
+    "id": "e72c8e7a-611e-4351-9a3b-c604b61c4268",
+    "request": "88ca203f0070111242e722788d44ee9c6eeab29c211179013d3aead36044ed3c",
+    "createdAt": "2026-08-20T19:08:21.229Z",
+    "tasks": [
+      {
+        "id": "TASK-001",
+        "title": "Analyze and Implement",
+        "prompt": "88ca203f0070111242e722788d44ee9c6eeab29c211179013d3aead36044ed3c",
+        "dependencies": [],
+        "requiredSkills": [
+          "project-planning"
+        ],
+        "fileScope": [],
+        "priority": 100,
+        "risk": "workspace-write",
+        "complexity": 3,
+        "status": "review",
+        "attempts": 620,
+        "error": "Supervisor recovery paused this task: Previous Supervisor instance terminated without a clean shutdown.",
+        "recoveryState": "orphaned"
+      },
+      {
+        "id": "TASK-002",
+        "title": "Review and Test",
+        "prompt": "Review and test the implementation for: 88ca203f0070111242e722788d44ee9c6eeab29c211179013d3aead36044ed3c",
+        "dependencies": [
+          "TASK-001"
+        ],
+        "requiredSkills": [
+          "code-review"
+        ],
+        "fileScope": [
+          "test",
+          "tests"
+        ],
+        "priority": 50,
+        "risk": "process-execute",
+        "complexity": 2,
+        "status": "blocked",
+        "attempts": 0
+      }
+    ],
+    "assumptions": [
+      "Only required clarification questions are asked; safe defaults are explained in the workflow log."
+    ],
+    "questions": []
+  },
+  "updatedAt": "2026-08-20T19:19:13.220Z",
+  "activeRuns": [],
+  "restartCount": 1,
+  "recoveryReason": "Previous Supervisor instance terminated without a clean shutdown."
+}
