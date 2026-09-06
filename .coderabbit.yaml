@@ -1,0 +1,30 @@
+language: typescript
+review:
+  auto_review:
+    enabled: true
+    base_branches: ["main", "master"]
+  path_filters:
+    - "*.ts"
+    - "*.tsx"
+    - "*.js"
+    - "*.jsx"
+  ignore_paths:
+    - "node_modules/**"
+    - "dist/**"
+    - "build/**"
+    - "*.config.*"
+    - "*.d.ts"
+  style:
+    enabled: true
+  security:
+    enabled: true
+  performance:
+    enabled: true
+  best_practices:
+    enabled: true
+  comments:
+    enabled: true
+    style: constructive
+labels:
+  - "coderabbit"
+  - "ai-review"

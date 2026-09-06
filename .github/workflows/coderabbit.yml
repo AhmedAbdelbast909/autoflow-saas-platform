@@ -1,0 +1,44 @@
+name: CodeRabbit Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main, master]
+
+permissions:
+  contents: read
+  pull_requests: write
+  statuses: write
+
+jobs:
+  coderabbit:
+    name: CodeRabbit AI Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: taskflow-saas/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./taskflow-saas
+        run: npm ci
+
+      - name: Run type checking
+        working-directory: ./taskflow-saas
+        run: npm run build
+
+      - name: Run CodeRabbit
+        uses: coderabbitai/coderabbit-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coderabbit-token: ${{ secrets.CODERABBIT_TOKEN }}
+          config-file: .coderabbit.yaml
