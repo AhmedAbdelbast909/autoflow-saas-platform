@@ -8,6 +8,7 @@ export interface DeepSeekHarnessOptions {
     timeoutMs: number;
     reviewDir: string;
     runId: string;
+    failOnUnavailable?: boolean;
 }
 export declare class DeepSeekHarnessReviewer implements Reviewer {
     private opts;

@@ -41,6 +41,7 @@ export interface ReviewerConfig {
     model?: string;
     timeoutMs?: number;
     envPrefixAllowlist?: string[];
+    failOnUnavailable?: boolean;
 }
 export interface OrchestratorConfig {
     orchestrator: {
@@ -133,8 +134,9 @@ export interface ReviewFinding {
     problem: string;
     required_fix: string;
 }
+export type ReviewStatus = "PASS" | "FAIL" | "UNAVAILABLE";
 export interface ReviewResult {
-    status: "PASS" | "FAIL";
+    status: ReviewStatus;
     summary: string;
     findings: ReviewFinding[];
     required_actions: string[];
@@ -165,6 +167,7 @@ export interface RunStateDoc {
     fixCycle: number;
     reviewCycle: number;
     consecutiveFailures: number;
+    reviewerStatus: ReviewStatus | null;
     currentModel: string | null;
     sessionId: string | null;
     startedAt: string;

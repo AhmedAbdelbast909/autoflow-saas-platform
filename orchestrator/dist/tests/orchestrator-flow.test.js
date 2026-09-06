@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ModelRouter } from "../src/model-router.js";
 import { runAutonomousTask } from "../src/orchestrator.js";
-import { runPaths, readState, readEvents } from "../src/state-store.js";
+import { runPaths, readState, readEvents, writeState } from "../src/state-store.js";
 import { DEFAULT_CONFIG } from "../src/config.js";
 let workdir = "";
 function makeConfig() {
@@ -63,6 +63,10 @@ const FAIL_P1 = {
     findings: [{ id: "SEC-001", severity: "P1", file: "src/a.ts", line: 1, problem: "auth bypass", required_fix: "enforce auth first" }],
     required_actions: ["Fix SEC-001"], rawOutput: "{}",
 };
+const UNAVAILABLE_REVIEW = {
+    status: "UNAVAILABLE", summary: "reviewer not found",
+    findings: [], required_actions: ["install reviewer"], rawOutput: "{}",
+};
 beforeEach(() => {
     workdir = mkdtempSync(join(tmpdir(), "orch-test-"));
     mkdirSync(join(workdir, ".ai", "orchestrator", "runs"), { recursive: true });
@@ -85,6 +89,21 @@ function models3() {
         { id: "m2", provider: "opencode", model: "opencode/m2", priority: 2, enabled: true },
         { id: "m3", provider: "opencode", model: "opencode/m3", priority: 3, enabled: true },
     ];
+}
+function certifiableState(runId, patch = {}) {
+    const now = new Date().toISOString();
+    return {
+        taskId: "task", runId, state: "CERTIFY",
+        attempt: 1, fixCycle: 1, reviewCycle: 1, consecutiveFailures: 0,
+        reviewerStatus: "PASS", currentModel: null, sessionId: null,
+        startedAt: now, updatedAt: now,
+        taskFile: "", taskText: "# T\n\n## Acceptance Criteria\n- [ ] done\n",
+        acceptanceCriteria: ["done"], findings: [], tests: [],
+        history: [{ state: "CERTIFY", at: now, note: "test" }],
+        modelsUsed: ["opencode/m1"], fallbacks: [], gitHead: null, gitBranch: null,
+        openCodePid: null, finalized: false,
+        ...patch,
+    };
 }
 describe("fallback + fix loop integration (fake adapters)", () => {
     it("falls back m1(quota) -> m2(rate) -> m3(success), no manual intervention", async () => {
@@ -199,6 +218,58 @@ describe("fallback + fix loop integration (fake adapters)", () => {
         assert.equal(st?.finalized, true);
         void r2;
     });
+    it("resume CERTIFY state uses persisted reviewerStatus PASS (crash before certify completes)", async () => {
+        const config = makeConfig();
+        config.coding.models = models3().slice(0, 1);
+        const router = new ModelRouter(config.coding.models, { cooldownMs: config.orchestrator.modelCooldownMs });
+        const runId = "run-resume-pass";
+        const paths = runPaths(workdir, runId);
+        mkdirSync(paths.runDir, { recursive: true });
+        await writeState(paths, certifiableState(runId, { reviewerStatus: "PASS" }));
+        const factory = (m) => new FakeCodingAgent(new Map(), paths.runDir);
+        const outcome = await runAutonomousTask({
+            taskFile: taskFile(), runId, paths, config,
+            caps: { openCode: { installed: true, version: "x", supportsRun: true, supportsModelFlag: true, supportsSessionFlag: true, supportsContinueFlag: true, supportsFormatJson: true }, reviewer: { executableFound: true, executable: "fake" } },
+            codingAgentFactory: factory, reviewer: new FakeReviewer([PASS_REVIEW]), router,
+        });
+        assert.equal(outcome.finalStatus, "CERTIFIED");
+    });
+    it("resume legacy CERTIFY state (no reviewerStatus field, empty findings) still certifies", async () => {
+        const config = makeConfig();
+        config.coding.models = models3().slice(0, 1);
+        const router = new ModelRouter(config.coding.models, { cooldownMs: config.orchestrator.modelCooldownMs });
+        const runId = "run-resume-legacy";
+        const paths = runPaths(workdir, runId);
+        mkdirSync(paths.runDir, { recursive: true });
+        const legacy = certifiableState(runId, { findings: [] });
+        delete legacy["reviewerStatus"];
+        await writeState(paths, legacy);
+        const factory = (m) => new FakeCodingAgent(new Map(), paths.runDir);
+        const outcome = await runAutonomousTask({
+            taskFile: taskFile(), runId, paths, config,
+            caps: { openCode: { installed: true, version: "x", supportsRun: true, supportsModelFlag: true, supportsSessionFlag: true, supportsContinueFlag: true, supportsFormatJson: true }, reviewer: { executableFound: true, executable: "fake" } },
+            codingAgentFactory: factory, reviewer: new FakeReviewer([PASS_REVIEW]), router,
+        });
+        assert.equal(outcome.finalStatus, "CERTIFIED");
+    });
+    it("resume CERTIFY state with persisted reviewerStatus FAIL does not certify", async () => {
+        const config = makeConfig();
+        config.coding.models = models3().slice(0, 1);
+        const router = new ModelRouter(config.coding.models, { cooldownMs: config.orchestrator.modelCooldownMs });
+        const runId = "run-resume-fail";
+        const paths = runPaths(workdir, runId);
+        mkdirSync(paths.runDir, { recursive: true });
+        await writeState(paths, certifiableState(runId, { reviewerStatus: "FAIL" }));
+        const factory = (m) => new FakeCodingAgent(new Map(), paths.runDir);
+        const outcome = await runAutonomousTask({
+            taskFile: taskFile(), runId, paths, config,
+            caps: { openCode: { installed: true, version: "x", supportsRun: true, supportsModelFlag: true, supportsSessionFlag: true, supportsContinueFlag: true, supportsFormatJson: true }, reviewer: { executableFound: true, executable: "fake" } },
+            codingAgentFactory: factory, reviewer: new FakeReviewer([PASS_REVIEW]), router,
+        });
+        assert.equal(outcome.finalStatus, "BLOCKED");
+        const st = await readState(paths);
+        assert.equal(st?.state, "BLOCKED");
+    });
     it("retry limits: maxModelAttempts exceeded -> BLOCKED", async () => {
         const config = makeConfig();
         config.orchestrator.maxModelAttempts = 2;
@@ -219,6 +290,59 @@ describe("fallback + fix loop integration (fake adapters)", () => {
         });
         assert.equal(outcome.finalStatus, "BLOCKED");
         assert.ok(FakeCodingAgent.calls.length <= 2);
+    });
+    it("reviewer UNAVAILABLE -> BLOCKED immediately (no fix loop)", async () => {
+        const config = makeConfig();
+        config.coding.models = models3().slice(0, 1);
+        const router = new ModelRouter(config.coding.models, { cooldownMs: config.orchestrator.modelCooldownMs });
+        const runId = "run-unavailable";
+        const paths = runPaths(workdir, runId);
+        const script = new Map([["opencode/m1", [{ ok: true }]]]);
+        const factory = (m) => new FakeCodingAgent(script, paths.runDir);
+        const outcome = await runAutonomousTask({
+            taskFile: taskFile(), runId, paths, config,
+            caps: { openCode: { installed: true, version: "x", supportsRun: true, supportsModelFlag: true, supportsSessionFlag: true, supportsContinueFlag: true, supportsFormatJson: true }, reviewer: { executableFound: true, executable: "fake" } },
+            codingAgentFactory: factory, reviewer: new FakeReviewer([UNAVAILABLE_REVIEW]), router,
+        });
+        assert.equal(outcome.finalStatus, "BLOCKED");
+        const events = await readEvents(paths);
+        const types = events.map((e) => String(e["type"]));
+        assert.ok(types.includes("REVIEW_UNAVAILABLE"));
+        assert.ok(!types.includes("FIX_STARTED"), "should not attempt fix when reviewer unavailable");
+    });
+    it("model fallback works during fix cycle (review FAIL -> fix -> model quota -> fallback -> test -> review PASS)", async () => {
+        const config = makeConfig();
+        config.coding.models = models3();
+        const router = new ModelRouter(config.coding.models, { cooldownMs: config.orchestrator.modelCooldownMs });
+        const runId = "run-fix-fallback";
+        const paths = runPaths(workdir, runId);
+        // Implementation succeeds on first model
+        // First review FAILs with P1
+        // Fix attempt on m1 hits quota -> fallback to m2 -> fix succeeds
+        // Retest passes, review PASS
+        const script = new Map([
+            ["opencode/m1", [{ ok: true }, { ok: false, kind: "QUOTA_EXCEEDED" }]], // implement OK, fix quota
+            ["opencode/m2", [{ ok: true }]], // fix succeeds on fallback
+        ]);
+        const factory = (m) => new FakeCodingAgent(script, paths.runDir);
+        const outcome = await runAutonomousTask({
+            taskFile: taskFile(), runId, paths, config,
+            caps: { openCode: { installed: true, version: "x", supportsRun: true, supportsModelFlag: true, supportsSessionFlag: true, supportsContinueFlag: true, supportsFormatJson: true }, reviewer: { executableFound: true, executable: "fake" } },
+            codingAgentFactory: factory, reviewer: new FakeReviewer([FAIL_P1, PASS_REVIEW]), router,
+        });
+        assert.equal(outcome.finalStatus, "CERTIFIED");
+        const used = FakeCodingAgent.calls.map((c) => c.model);
+        assert.deepEqual(used, ["opencode/m1", "opencode/m1", "opencode/m2"]);
+        const events = await readEvents(paths);
+        const types = events.map((e) => String(e["type"]));
+        assert.ok(types.includes("REVIEW_FAILED"));
+        assert.ok(types.includes("MODEL_QUOTA_EXCEEDED"));
+        assert.ok(types.includes("MODEL_FALLBACK"));
+        assert.ok(types.includes("FIX_STARTED"));
+        assert.ok(types.includes("FIX_COMPLETED"));
+        assert.ok(types.includes("TEST_STARTED"));
+        assert.ok(types.includes("REVIEW_PASSED"));
+        assert.ok(types.includes("CERTIFIED"));
     });
 });
 //# sourceMappingURL=orchestrator-flow.test.js.map

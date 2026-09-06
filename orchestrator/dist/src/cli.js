@@ -26,6 +26,7 @@ Commands:
   stop --run-id <id>                                       mark a run CANCELLED (does not kill processes)
   models                                                   list configured models + health
   runs                                                     list runs
+  reviewers                                                show reviewer configuration and availability
   doctor                                                   verify environment
 
 Options:
@@ -136,6 +137,7 @@ async function cmdStart(taskFile, configFlag, runId) {
         executable: config.review.executable, args: config.review.args ?? ["review", "--format", "json"],
         model: config.review.model, timeoutMs: config.review.timeoutMs ?? config.orchestrator.reviewerTimeoutMs,
         reviewDir: paths.reviewDir, runId: id,
+        failOnUnavailable: config.review.failOnUnavailable ?? false,
     });
     const outcome = await runAutonomousTask({ taskFile: absTask, runId: id, paths, config, caps, codingAgentFactory, reviewer, router });
     console.log(`final: ${outcome.finalStatus}  report: ${outcome.reportPath}`);
@@ -174,6 +176,22 @@ async function cmdStop(runId) {
     console.log(`run ${runId} marked CANCELLED`);
     return 0;
 }
+async function cmdReviewers(configFlag) {
+    const { config } = await getConfig(configFlag);
+    const executableFound = await reviewerExecutableExists(config.review.executable);
+    console.log(`Reviewer Configuration:`);
+    console.log(`  Provider:       ${config.review.provider}`);
+    console.log(`  Model:          ${config.review.model}`);
+    console.log(`  Executable:     ${config.review.executable}`);
+    console.log(`  Args:           ${config.review.args?.join(" ") ?? "(none)"}`);
+    console.log(`  Timeout:        ${config.review.timeoutMs ?? config.orchestrator.reviewerTimeoutMs}ms`);
+    console.log(`  Available:      ${executableFound ? "YES" : "NO"}`);
+    if (!executableFound) {
+        console.log(`  Note:           Reviewer not found in PATH. Set ORCH_REVIEW_EXEC or install DeepSeek Harness.`);
+        console.log(`  Behavior:       Orchestrator will return UNAVAILABLE and block certification.`);
+    }
+    return executableFound ? 0 : 2;
+}
 async function ensureDefaultConfig() {
     const p = defaultConfigPath(repoRoot);
     if (!existsSync(p)) {
@@ -198,6 +216,8 @@ async function main() {
         return cmdModels(arg("--config"));
     if (cmd === "runs")
         return cmdRuns();
+    if (cmd === "reviewers")
+        return cmdReviewers(arg("--config"));
     if (cmd === "status")
         return cmdStatus(arg("--run-id"));
     if (cmd === "stop") {

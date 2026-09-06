@@ -1,0 +1,4 @@
+{"type":"RUN_STARTED","timestamp":"2026-09-06T12:20:32.550Z","runId":"test-full-loop-1788697231855","taskId":"task"}
+{"type":"PLAN_CREATED","timestamp":"2026-09-06T12:20:32.558Z"}
+{"type":"MODEL_SELECTED","timestamp":"2026-09-06T12:20:32.561Z","model":"opencode/nemotron-3-ultra-free","id":"coding-primary"}
+{"type":"OPENCODE_STARTED","timestamp":"2026-09-06T12:20:33.180Z","model":"opencode/nemotron-3-ultra-free","attempt":1}

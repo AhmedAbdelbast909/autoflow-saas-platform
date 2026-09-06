@@ -1,0 +1,16 @@
+{"type":"RUN_STARTED","timestamp":"2026-09-05T08:19:37.923Z","runId":"test-final-1788596377517","taskId":"task"}
+{"type":"PLAN_CREATED","timestamp":"2026-09-05T08:19:37.927Z"}
+{"type":"MODEL_SELECTED","timestamp":"2026-09-05T08:19:37.929Z","model":"opencode/nemotron-3-ultra-free","id":"coding-primary"}
+{"type":"OPENCODE_STARTED","timestamp":"2026-09-05T08:19:38.310Z","model":"opencode/nemotron-3-ultra-free","attempt":1}
+{"type":"OPENCODE_COMPLETED","timestamp":"2026-09-05T08:19:38.797Z","model":"opencode/nemotron-3-ultra-free","headBefore":"0c910b4c9a2aacce98a1e84df0b988cef24e45b7","headAfter":"0c910b4c9a2aacce98a1e84df0b988cef24e45b7"}
+{"type":"TEST_STARTED","timestamp":"2026-09-05T08:19:38.802Z"}
+{"type":"TEST_COMPLETED","timestamp":"2026-09-05T08:19:45.849Z","status":"PASS","gates":[{"name":"typecheck","status":"PASS"},{"name":"lint","status":"SKIPPED"},{"name":"tests","status":"SKIPPED"},{"name":"build","status":"PASS"}]}
+{"type":"REVIEW_STARTED","timestamp":"2026-09-05T08:19:45.851Z","cycle":1}
+{"type":"REVIEW_UNAVAILABLE","timestamp":"2026-09-05T08:19:46.482Z","summary":"Reviewer executable not found in PATH. Review skipped."}
+{"type":"RUN_RESUMED","timestamp":"2026-09-05T08:19:46.601Z","runId":"test-final-1788596377517","state":"BLOCKED"}
+{"type":"RUN_RESUMED","timestamp":"2026-09-05T17:09:51.319Z","runId":"test-final-1788596377517","state":"BLOCKED"}
+{"type":"RUN_RESUMED","timestamp":"2026-09-05T17:11:31.473Z","runId":"test-final-1788596377517","state":"REVIEW"}
+{"type":"REVIEW_STARTED","timestamp":"2026-09-05T17:11:31.474Z","cycle":2}
+{"type":"REVIEW_FAILED","timestamp":"2026-09-05T17:20:01.203Z","findingCount":2}
+{"type":"MODEL_SELECTED","timestamp":"2026-09-05T17:20:01.205Z","model":"opencode/nemotron-3-ultra-free","id":"coding-primary"}
+{"type":"FIX_STARTED","timestamp":"2026-09-05T17:20:01.607Z","model":"opencode/nemotron-3-ultra-free","attempt":2}

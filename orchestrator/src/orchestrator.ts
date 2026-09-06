@@ -9,7 +9,7 @@ import { emitEvent, ensureRunDirs, readState, writeState, type Paths } from "./s
 import { redactSecrets } from "./secrets.js";
 import type {
   CodingAgent, CodingResult, FinalStatus, GateResult, ModelEntry,
-  OrchestratorConfig, OrchestratorCapabilities, Reviewer, ReviewFinding, RunStateDoc,
+  OrchestratorConfig, OrchestratorCapabilities, Reviewer, ReviewFinding, RunStateDoc, ReviewStatus,
 } from "./types.js";
 
 export interface RunOptions {
@@ -62,7 +62,7 @@ export function certificationDecision(
   config: OrchestratorConfig,
   findings: ReviewFinding[],
   gates: GateResult[],
-  reviewerStatus: "PASS" | "FAIL" | null,
+  reviewerStatus: ReviewStatus | null,
 ): { certifiable: boolean; blockers: string[] } {
   const blockers: string[] = [];
   const p0 = findings.filter((f) => f.severity === "P0").length;
@@ -123,7 +123,7 @@ export async function runAutonomousTask(opts: RunOptions): Promise<RunOutcome> {
     state = {
       taskId: parsed.taskId, runId: opts.runId, state: "DISCOVER",
       attempt: 0, fixCycle: 0, reviewCycle: 0, consecutiveFailures: 0,
-      currentModel: null, sessionId: null,
+      reviewerStatus: null, currentModel: null, sessionId: null,
       startedAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
       taskFile: opts.taskFile, taskText: parsed.taskText,
       acceptanceCriteria: parsed.acceptance, findings: [], tests: [],
@@ -139,7 +139,7 @@ export async function runAutonomousTask(opts: RunOptions): Promise<RunOutcome> {
   }
 
   const dead: string[] = [];
-  let reviewerStatus: "PASS" | "FAIL" | null = null;
+  let reviewerStatus: ReviewStatus | null = state.reviewerStatus ?? (state.findings.length === 0 ? "PASS" : null);
 
   const planIfNeeded = async () => {
     if (state!.fixCycle > 0 || state!.attempt > 0) return;
@@ -314,9 +314,13 @@ export async function runAutonomousTask(opts: RunOptions): Promise<RunOutcome> {
       }
       state.findings = review.findings;
       reviewerStatus = review.status;
+      state.reviewerStatus = review.status;
+      await writeState(paths, state);
       await writeFile(join(paths.reviewDir, `review-cycle${state.reviewCycle}.json`), JSON.stringify(review, null, 2), "utf8");
       if (review.status === "FAIL") {
         await emitEvent(paths, "REVIEW_FAILED", { findingCount: review.findings.length });
+      } else if (review.status === "UNAVAILABLE") {
+        await emitEvent(paths, "REVIEW_UNAVAILABLE", { summary: review.summary });
       } else {
         await emitEvent(paths, "REVIEW_PASSED", {});
       }
@@ -326,6 +330,13 @@ export async function runAutonomousTask(opts: RunOptions): Promise<RunOutcome> {
         transition(state, "CERTIFY", "gates + review pass");
         await writeState(paths, state);
         continue;
+      }
+      // If reviewer is UNAVAILABLE, certification is impossible - block immediately
+      if (reviewerStatus === "UNAVAILABLE") {
+        transition(state, "BLOCKED", "reviewer unavailable; cannot certify");
+        await writeState(paths, state);
+        const rp = await writeFinalReport(paths, state, "BLOCKED", [...blockers, "Reviewer unavailable - certification requires reviewer PASS"]);
+        return { finalStatus: "BLOCKED", reportPath: rp, runId: opts.runId };
       }
       // Not certifiable: if reviewer FAIL with P0/P1 -> fix loop; if gates fail -> fix loop too (up to limits)
       const hasBlockerFindings = state.findings.some((f) => f.severity === "P0" || f.severity === "P1");
@@ -349,7 +360,7 @@ export async function runAutonomousTask(opts: RunOptions): Promise<RunOutcome> {
 
     // ---- CERTIFY / COMMIT ----
     if (state.state === "CERTIFY" || state.state === "COMMIT") {
-      const { certifiable, blockers } = certificationDecision(config, state.findings, state.tests, reviewerStatus ?? (state.findings.length === 0 ? "PASS" : null));
+      const { certifiable, blockers } = certificationDecision(config, state.findings, state.tests, reviewerStatus);
       if (!certifiable) {
         transition(state, "BLOCKED", "certification gates not satisfied");
         await writeState(paths, state);

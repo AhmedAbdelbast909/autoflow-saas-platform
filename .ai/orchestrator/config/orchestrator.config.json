@@ -17,10 +17,10 @@
     ]
   },
   "review": {
-    "provider": "deepseek",
-    "model": "deepseek/deepseek-reasoner",
-    "executable": "deepseek-harness",
-    "args": ["review", "--format", "json"],
+    "provider": "opencode",
+    "model": "opencode/nemotron-3-ultra-free",
+    "executable": "opencode",
+    "args": ["run", "--model", "opencode/nemotron-3-ultra-free"],
     "timeoutMs": 600000
   },
   "quality": { "typecheck": true, "lint": true, "tests": true, "build": true, "projectDir": "taskflow-saas" },

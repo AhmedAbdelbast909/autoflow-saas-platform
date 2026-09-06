@@ -1,0 +1,9 @@
+{
+  "status": "UNAVAILABLE",
+  "summary": "Reviewer executable not found in PATH. Review skipped.",
+  "findings": [],
+  "required_actions": [
+    "Install/configure DeepSeek Harness"
+  ],
+  "rawOutput": ""
+}

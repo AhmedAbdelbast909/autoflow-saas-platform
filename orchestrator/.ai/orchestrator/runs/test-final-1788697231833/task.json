@@ -1,0 +1,8 @@
+{
+  "taskId": "task",
+  "taskFile": "C:\\Users\\ahmed\\Desktop\\auto\\orchestrator\\.ai\\orchestrator\\test-final\\task.md",
+  "acceptanceCriteria": [
+    "[ ] File created at integration-output/test.txt",
+    "[ ] Content is exactly \"orchestrator works\""
+  ]
+}

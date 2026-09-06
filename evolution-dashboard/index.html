@@ -488,6 +488,175 @@
     </div>
   </div>
 
+  <!-- MODAL: Instance Details / Workspace -->
+  <div class="modal-backdrop" id="instanceDetailsModal">
+    <div class="modal-dialog instance-details-dialog">
+      <div class="instance-details-header">
+        <div class="instance-details-identity">
+          <div class="instance-avatar" id="instanceDetailsAvatar">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div class="instance-details-title">
+            <div class="instance-name" id="instanceDetailsName">Instance</div>
+            <div class="instance-provider-tag" id="instanceDetailsIntegration">—</div>
+          </div>
+        </div>
+        <div class="instance-details-header-right">
+          <span class="badge badge-warning" id="instanceDetailsStatus">Checking…</span>
+          <button class="close-modal-btn" id="closeInstanceDetailsBtn" title="Close">&times;</button>
+        </div>
+      </div>
+
+      <div class="instance-tabs">
+        <button class="instance-tab active" data-instance-tab="overview"><i class="fa-solid fa-circle-info"></i> Overview</button>
+        <button class="instance-tab" data-instance-tab="message"><i class="fa-solid fa-paper-plane"></i> Message</button>
+        <button class="instance-tab" data-instance-tab="settings"><i class="fa-solid fa-sliders"></i> Settings</button>
+        <button class="instance-tab" data-instance-tab="webhooks"><i class="fa-solid fa-diagram-project"></i> Webhooks</button>
+        <button class="instance-tab" data-instance-tab="data"><i class="fa-solid fa-comments"></i> Chats &amp; Contacts</button>
+      </div>
+
+      <div class="instance-details-panels">
+        <!-- Overview & Status -->
+        <div class="instance-tab-panel active" data-instance-panel="overview">
+          <div class="details-info-grid">
+            <div class="details-info-item">
+              <span class="label">Instance Token</span>
+              <span class="val mono" id="instanceDetailsToken">—</span>
+            </div>
+            <div class="details-info-item">
+              <span class="label">Linked Phone (Owner JID)</span>
+              <span class="val mono" id="instanceDetailsOwnerJid">—</span>
+            </div>
+            <div class="details-info-item">
+              <span class="label">Connection Status</span>
+              <span class="val" id="instanceDetailsConnState">—</span>
+            </div>
+            <div class="details-info-item">
+              <span class="label">Uptime</span>
+              <span class="val" id="instanceDetailsUptime">—</span>
+            </div>
+            <div class="details-info-item">
+              <span class="label">Profile Picture</span>
+              <span class="val">
+                <img id="instanceDetailsProfilePic" class="details-profile-pic" src="" alt="Profile" style="display: none;">
+                <span id="instanceDetailsProfilePicFallback">—</span>
+              </span>
+            </div>
+            <div class="details-info-item">
+              <span class="label">Integration Type</span>
+              <span class="val" id="instanceDetailsIntegrationType">—</span>
+            </div>
+          </div>
+
+          <div class="quick-action-bar">
+            <button class="btn btn-sm btn-primary" id="instanceConnectBtn"><i class="fa-solid fa-qrcode"></i> Connect</button>
+            <button class="btn btn-sm btn-secondary" id="instanceRestartBtn"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+            <button class="btn btn-sm btn-secondary" id="instanceClearCacheBtn"><i class="fa-solid fa-broom"></i> Clear Cache</button>
+            <button class="btn btn-sm btn-danger" id="instanceDeleteBtn"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        </div>
+
+        <!-- Interactive Messaging -->
+        <div class="instance-tab-panel" data-instance-panel="message">
+          <div class="instance-send-form">
+            <div class="form-group">
+              <label for="instanceMessageNumber">Recipient Number (with country code)</label>
+              <input type="text" id="instanceMessageNumber" class="form-control" placeholder="e.g. 201012345678 or 14155552671">
+            </div>
+            <div class="form-group">
+              <label for="instanceMessageText">Message Content</label>
+              <textarea id="instanceMessageText" class="form-control" rows="3" placeholder="Hello from the instance workspace..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="instanceMessageSendBtn"><i class="fa-solid fa-paper-plane"></i> Send from this Instance</button>
+          </div>
+        </div>
+
+        <!-- Instance Settings -->
+        <div class="instance-tab-panel" data-instance-panel="settings">
+          <div class="settings-toggle-list">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="instanceRejectCallsToggle">
+              <span class="checkmark"></span>
+              Reject Calls <code class="mono-hint">rejectCall</code>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="instanceReadMessagesToggle">
+              <span class="checkmark"></span>
+              Read Messages <code class="mono-hint">readMessages</code>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="instanceReadStatusToggle">
+              <span class="checkmark"></span>
+              Read Status <code class="mono-hint">readStatus</code>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="instanceSyncFullHistoryToggle">
+              <span class="checkmark"></span>
+              Sync Full History <code class="mono-hint">syncFullHistory</code>
+            </label>
+          </div>
+          <button class="btn btn-primary" id="instanceSettingsSaveBtn"><i class="fa-solid fa-check"></i> Save Settings</button>
+        </div>
+
+        <!-- Webhooks & Chatbots -->
+        <div class="instance-tab-panel" data-instance-panel="webhooks">
+          <div class="form-group">
+            <label for="instanceWebhookUrl">Webhook URL</label>
+            <input type="url" id="instanceWebhookUrl" class="form-control" placeholder="https://your-server.com/webhook">
+          </div>
+          <label class="custom-checkbox webhook-enabled">
+            <input type="checkbox" id="instanceWebhookEnabledToggle" checked>
+            <span class="checkmark"></span>
+            Webhook Enabled
+          </label>
+          <div class="event-box">
+            <div class="event-box-title">Subscribe Webhook Events</div>
+            <div class="event-checkbox-grid" id="instanceWebhookEvents"></div>
+          </div>
+          <button class="btn btn-primary" id="instanceWebhookSaveBtn"><i class="fa-solid fa-check"></i> Save Webhook</button>
+
+          <div class="integration-status-list">
+            <div class="integration-status-title">Chatbot &amp; Automation Bindings</div>
+            <div class="integration-chip">
+              <span class="chip-name"><i class="fa-solid fa-headset chatwoot"></i> Chatwoot</span>
+              <span class="badge" id="instanceChatwootStatus">—</span>
+            </div>
+            <div class="integration-chip">
+              <span class="chip-name"><i class="fa-solid fa-robot typebot"></i> Typebot</span>
+              <span class="badge" id="instanceTypebotStatus">—</span>
+            </div>
+            <div class="integration-chip">
+              <span class="chip-name"><i class="fa-solid fa-brain dify"></i> Dify</span>
+              <span class="badge" id="instanceDifyStatus">—</span>
+            </div>
+            <div class="integration-chip">
+              <span class="chip-name"><i class="fa-solid fa-diagram-project n8n"></i> n8n</span>
+              <span class="badge" id="instanceN8nStatus">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chats & Contacts Counter -->
+        <div class="instance-tab-panel" data-instance-panel="data">
+          <div class="counts-grid">
+            <div class="count-card">
+              <div class="count-value" id="instanceCountMessages">—</div>
+              <div class="count-label"><i class="fa-solid fa-message"></i> Messages</div>
+            </div>
+            <div class="count-card">
+              <div class="count-value" id="instanceCountContacts">—</div>
+              <div class="count-label"><i class="fa-solid fa-address-book"></i> Contacts</div>
+            </div>
+            <div class="count-card">
+              <div class="count-value" id="instanceCountChats">—</div>
+              <div class="count-label"><i class="fa-solid fa-comments"></i> Chats</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: QR Code Connect Modal -->
   <div class="modal-backdrop" id="qrModal">
     <div class="modal-dialog qr-modal-dialog">

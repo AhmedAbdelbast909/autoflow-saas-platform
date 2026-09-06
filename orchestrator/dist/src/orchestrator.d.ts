@@ -1,6 +1,6 @@
 import { ModelRouter } from "./model-router.js";
 import { type Paths } from "./state-store.js";
-import type { CodingAgent, FinalStatus, GateResult, ModelEntry, OrchestratorConfig, OrchestratorCapabilities, Reviewer, ReviewFinding } from "./types.js";
+import type { CodingAgent, FinalStatus, GateResult, ModelEntry, OrchestratorConfig, OrchestratorCapabilities, Reviewer, ReviewFinding, ReviewStatus } from "./types.js";
 export interface RunOptions {
     taskFile: string;
     runId: string;
@@ -16,7 +16,7 @@ export interface RunOutcome {
     reportPath: string;
     runId: string;
 }
-export declare function certificationDecision(config: OrchestratorConfig, findings: ReviewFinding[], gates: GateResult[], reviewerStatus: "PASS" | "FAIL" | null): {
+export declare function certificationDecision(config: OrchestratorConfig, findings: ReviewFinding[], gates: GateResult[], reviewerStatus: ReviewStatus | null): {
     certifiable: boolean;
     blockers: string[];
 };

@@ -7,7 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     instances: [],
     activeTab: 'instances',
     qrPollTimer: null,
-    currentConnectingInstance: null
+    currentConnectingInstance: null,
+    currentInstanceName: null,
+    currentInstanceState: 'close',
+    currentSettings: null,
+    currentWebhookId: null,
+    serverUptime: null
   };
 
   // DOM Elements
@@ -46,6 +51,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const pairingCodeDisplay = document.getElementById('pairingCodeDisplay');
   const copyPairingBtn = document.getElementById('copyPairingBtn');
 
+  // Instance Details Modal
+  const instanceDetailsModal = document.getElementById('instanceDetailsModal');
+  const closeInstanceDetailsBtn = document.getElementById('closeInstanceDetailsBtn');
+  const instanceDetailsName = document.getElementById('instanceDetailsName');
+  const instanceDetailsIntegration = document.getElementById('instanceDetailsIntegration');
+  const instanceDetailsIntegrationType = document.getElementById('instanceDetailsIntegrationType');
+  const instanceDetailsStatus = document.getElementById('instanceDetailsStatus');
+  const instanceDetailsToken = document.getElementById('instanceDetailsToken');
+  const instanceDetailsOwnerJid = document.getElementById('instanceDetailsOwnerJid');
+  const instanceDetailsConnState = document.getElementById('instanceDetailsConnState');
+  const instanceDetailsUptime = document.getElementById('instanceDetailsUptime');
+  const instanceDetailsProfilePic = document.getElementById('instanceDetailsProfilePic');
+  const instanceDetailsProfilePicFallback = document.getElementById('instanceDetailsProfilePicFallback');
+  const instanceConnectBtn = document.getElementById('instanceConnectBtn');
+  const instanceRestartBtn = document.getElementById('instanceRestartBtn');
+  const instanceClearCacheBtn = document.getElementById('instanceClearCacheBtn');
+  const instanceDeleteBtn = document.getElementById('instanceDeleteBtn');
+  const instanceMessageNumber = document.getElementById('instanceMessageNumber');
+  const instanceMessageText = document.getElementById('instanceMessageText');
+  const instanceMessageSendBtn = document.getElementById('instanceMessageSendBtn');
+  const instanceRejectCallsToggle = document.getElementById('instanceRejectCallsToggle');
+  const instanceReadMessagesToggle = document.getElementById('instanceReadMessagesToggle');
+  const instanceReadStatusToggle = document.getElementById('instanceReadStatusToggle');
+  const instanceSyncFullHistoryToggle = document.getElementById('instanceSyncFullHistoryToggle');
+  const instanceSettingsSaveBtn = document.getElementById('instanceSettingsSaveBtn');
+  const instanceWebhookUrl = document.getElementById('instanceWebhookUrl');
+  const instanceWebhookEnabledToggle = document.getElementById('instanceWebhookEnabledToggle');
+  const instanceWebhookEvents = document.getElementById('instanceWebhookEvents');
+  const instanceWebhookSaveBtn = document.getElementById('instanceWebhookSaveBtn');
+  const instanceChatwootStatus = document.getElementById('instanceChatwootStatus');
+  const instanceTypebotStatus = document.getElementById('instanceTypebotStatus');
+  const instanceDifyStatus = document.getElementById('instanceDifyStatus');
+  const instanceN8nStatus = document.getElementById('instanceN8nStatus');
+  const instanceCountMessages = document.getElementById('instanceCountMessages');
+  const instanceCountContacts = document.getElementById('instanceCountContacts');
+  const instanceCountChats = document.getElementById('instanceCountChats');
+
   // Message Studio
   const messageInstanceSelect = document.getElementById('messageInstanceSelect');
   const sendMessageForm = document.getElementById('sendMessageForm');
@@ -68,6 +110,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize input values
   apiUrlInput.value = state.apiUrl;
   apiKeyInput.value = state.apiKey;
+
+  const DEFAULT_WEBHOOK_EVENTS = [
+    'application.startup', 'instance.create', 'instance.delete',
+    'qrcode.updated', 'connection.update', 'status.instance',
+    'messages.set', 'messages.upsert', 'messages.edited', 'messages.update', 'messages.delete',
+    'send.message', 'send.message.update',
+    'contacts.set', 'contacts.upsert', 'contacts.update', 'presence.update',
+    'chats.set', 'chats.upsert', 'chats.update', 'chats.delete',
+    'groups.upsert', 'groups.update', 'group-participants.update',
+    'typebot.start', 'typebot.change-status',
+    'labels.edit', 'labels.association', 'creds.update',
+    'messaging-history.set', 'remove.instance', 'logout.instance'
+  ];
 
   // Logger helper
   function logJournal(type, tag, message) {
@@ -161,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const hours = Math.floor(liveRes.data.uptimeSec / 3600);
       const mins = Math.floor((liveRes.data.uptimeSec % 3600) / 60);
       kpiUptime.textContent = `${hours}h ${mins}m`;
+      state.serverUptime = `${hours}h ${mins}m`;
     }
   }
 
@@ -206,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const card = document.createElement('div');
       card.className = 'instance-card';
+      card.title = `Open workspace for "${name}"`;
       card.innerHTML = `
         <div class="instance-card-header">
           <div class="instance-title-row">
@@ -259,23 +316,26 @@ document.addEventListener('DOMContentLoaded', () => {
       // Event listeners for actions
       const connectBtn = card.querySelector('.connect-btn');
       if (connectBtn) {
-        connectBtn.addEventListener('click', () => openQrModal(name));
+        connectBtn.addEventListener('click', (e) => { e.stopPropagation(); openQrModal(name); });
       }
 
       const disconnectBtn = card.querySelector('.disconnect-btn');
       if (disconnectBtn) {
-        disconnectBtn.addEventListener('click', () => handleLogoutInstance(name));
+        disconnectBtn.addEventListener('click', (e) => { e.stopPropagation(); handleLogoutInstance(name); });
       }
 
       const restartBtn = card.querySelector('.restart-btn');
       if (restartBtn) {
-        restartBtn.addEventListener('click', () => handleRestartInstance(name));
+        restartBtn.addEventListener('click', (e) => { e.stopPropagation(); handleRestartInstance(name); });
       }
 
       const deleteBtn = card.querySelector('.delete-btn');
       if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => handleDeleteInstance(name));
+        deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteInstance(name); });
       }
+
+      // Open instance workspace on card click
+      card.addEventListener('click', () => openInstanceDetails(name));
 
       instancesContainer.appendChild(card);
     });
@@ -346,6 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           qrModal.classList.remove('active');
           fetchInstances();
+          if (state.currentInstanceName === instanceName) refreshInstanceDetails();
         }, 1500);
       }
     } else {
@@ -431,6 +492,363 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast(`Delete failed: ${res.error || res.status}`, 'error');
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Instance Details / Workspace Modal
+  // ---------------------------------------------------------------------------
+  function findInstance(name) {
+    return state.instances.find(i => (i.name || i.instanceName) === name);
+  }
+
+  function renderWebhookEvents() {
+    if (!instanceWebhookEvents) return;
+    instanceWebhookEvents.innerHTML = '';
+    DEFAULT_WEBHOOK_EVENTS.forEach(ev => {
+      const label = document.createElement('label');
+      label.className = 'custom-checkbox';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = ev;
+      const checkmark = document.createElement('span');
+      checkmark.className = 'checkmark';
+      const txt = document.createElement('span');
+      txt.textContent = ev;
+      label.appendChild(cb);
+      label.appendChild(checkmark);
+      label.appendChild(txt);
+      instanceWebhookEvents.appendChild(label);
+    });
+  }
+
+  function selectedWebhookEvents() {
+    if (!instanceWebhookEvents) return [];
+    return Array.from(instanceWebhookEvents.querySelectorAll('input[type="checkbox"]:checked')).map(c => c.value);
+  }
+
+  function setWebhookEventsSelected(events) {
+    if (!instanceWebhookEvents) return;
+    instanceWebhookEvents.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.checked = Array.isArray(events) && events.includes(cb.value);
+    });
+  }
+
+  function updateInstanceStatusBadge(status, connected) {
+    instanceDetailsStatus.textContent = connected ? '● Connected' : status ? `○ ${status}` : '○ Standby';
+    instanceDetailsStatus.className = `badge ${connected ? 'badge-success' : 'badge-warning'}`;
+    instanceDetailsConnState.textContent = String(status || 'close').toUpperCase();
+    instanceConnectBtn.innerHTML = connected
+      ? '<i class="fa-solid fa-power-off"></i> Disconnect'
+      : '<i class="fa-solid fa-qrcode"></i> Connect';
+  }
+
+  function renderInstanceOverview(inst, status, connected) {
+    const name = inst.name || inst.instanceName || 'Unnamed';
+    const integration = inst.integration || 'Baileys Channel';
+    instanceDetailsName.textContent = name;
+    instanceDetailsIntegration.textContent = integration;
+    instanceDetailsIntegrationType.textContent = inst.integration || 'WHATSAPP-BAILEYS';
+    instanceDetailsToken.textContent = inst.token || '—';
+    instanceDetailsOwnerJid.textContent = inst.ownerJid || inst.owner || 'Not Linked';
+    instanceDetailsUptime.textContent = state.serverUptime || '—';
+    updateInstanceStatusBadge(status, connected);
+
+    if (inst.profilePicUrl) {
+      instanceDetailsProfilePic.src = inst.profilePicUrl;
+      instanceDetailsProfilePic.style.display = 'inline-block';
+      instanceDetailsProfilePicFallback.style.display = 'none';
+    } else {
+      instanceDetailsProfilePic.style.display = 'none';
+      instanceDetailsProfilePicFallback.style.display = 'inline';
+    }
+  }
+
+  function renderIntegrationStatus(inst) {
+    const setChip = (el, configured, label) => {
+      if (!el) return;
+      el.textContent = configured ? label || 'Enabled' : 'Not Configured';
+      el.className = `badge ${configured ? 'badge-success' : 'badge-warning'}`;
+    };
+
+    setChip(instanceChatwootStatus, !!(inst.Chatwoot && inst.Chatwoot.enabled));
+    const typebots = Array.isArray(inst.Typebot) ? inst.Typebot : [];
+    const typebotEnabled = typebots.some(t => t && t.enabled);
+    const difyEnabled = typebots.some(t => t && t.enabled && String(t.type || t.integrationType || '').toUpperCase().includes('DIFY'));
+    setChip(instanceTypebotStatus, typebotEnabled);
+    setChip(instanceDifyStatus, difyEnabled);
+    // n8n integration is delivered over the instance webhook
+    const webhookUrl = inst.Webhook ? (inst.Webhook.url || '') : (inst.webhook ? (inst.webhook.url || '') : '');
+    const n8nHook = webhookUrl && /n8n/i.test(webhookUrl);
+    setChip(instanceN8nStatus, n8nHook, 'Via Webhook');
+  }
+
+  async function loadConnectionState(name) {
+    const res = await apiRequest(`/instance/connectionState/${name}`);
+    if (res.ok && res.data) {
+      const stateStr = res.data.instance?.state || res.data.state || res.data.instance?.connectionStatus?.state;
+      if (stateStr) {
+        state.currentInstanceState = String(stateStr).toLowerCase();
+        const connected = state.currentInstanceState === 'open';
+        updateInstanceStatusBadge(state.currentInstanceState, connected);
+        return state.currentInstanceState;
+      }
+    }
+    return null;
+  }
+
+  async function loadSettings(name) {
+    const cached = findInstance(name) || {};
+    const fallback = cached.Setting || cached.settings || {};
+    const res = await apiRequest(`/settings/find/${name}`);
+    let settings = (res.ok && res.data && typeof res.data === 'object') ? res.data : {};
+    if (settings && typeof settings === 'object' && 'settings' in settings && typeof settings.settings === 'object') {
+      settings = settings.settings;
+    }
+    const merged = { ...fallback, ...settings };
+    state.currentSettings = merged;
+    instanceRejectCallsToggle.checked = !!merged.rejectCall;
+    instanceReadMessagesToggle.checked = !!merged.readMessages;
+    instanceReadStatusToggle.checked = !!merged.readStatus;
+    instanceSyncFullHistoryToggle.checked = !!merged.syncFullHistory;
+  }
+
+  async function loadWebhook(name) {
+    if (!instanceWebhookEvents) return;
+    instanceWebhookUrl.value = '';
+    instanceWebhookEnabledToggle.checked = true;
+    setWebhookEventsSelected([]);
+    state.currentWebhookId = null;
+
+    const res = await apiRequest(`/instance/${encodeURIComponent(name)}/webhooks`);
+    if (!res.ok) {
+      instanceWebhookUrl.value = '';
+      return;
+    }
+    const list = Array.isArray(res.data) && Array.isArray(res.data[0]) ? res.data[0] : res.data;
+    const destinations = Array.isArray(list) ? list : [];
+    const dest = destinations[0] || null;
+    if (!dest) return;
+    state.currentWebhookId = dest.id && !String(dest.id).startsWith('legacy') ? dest.id : null;
+    instanceWebhookUrl.value = dest.url || '';
+    instanceWebhookEnabledToggle.checked = dest.enabled !== false;
+    setWebhookEventsSelected(Array.isArray(dest.events) && !dest.events.includes('*') ? dest.events : DEFAULT_WEBHOOK_EVENTS);
+  }
+
+  function loadCounts(inst) {
+    const count = inst._count || {};
+    instanceCountMessages.textContent = count.Message ?? count.message ?? '—';
+    instanceCountContacts.textContent = count.Contact ?? count.contact ?? '—';
+    instanceCountChats.textContent = count.Chat ?? count.chat ?? '—';
+  }
+
+  async function refreshInstanceDetails() {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    const cached = findInstance(name) || {};
+
+    renderInstanceOverview(cached, cached.connectionStatus || 'close', (cached.connectionStatus || '').toLowerCase() === 'open');
+    renderIntegrationStatus(cached);
+    loadCounts(cached);
+
+    // Fresh instance detail (includes _count and bindings when the instance is live)
+    const fresh = await apiRequest(`/instance/fetchInstances?instanceName=${encodeURIComponent(name)}`);
+    if (fresh.ok && Array.isArray(fresh.data) && fresh.data.length > 0) {
+      const inst = fresh.data[0];
+      Object.assign(cached, inst);
+      renderInstanceOverview(inst, inst.connectionStatus || 'close', (inst.connectionStatus || '').toLowerCase() === 'open');
+      renderIntegrationStatus(inst);
+      loadCounts(inst);
+    }
+
+    await Promise.all([
+      loadConnectionState(name),
+      loadSettings(name),
+      loadWebhook(name)
+    ]);
+  }
+
+  function openInstanceDetails(name) {
+    state.currentInstanceName = name;
+    instanceDetailsModal.classList.add('active');
+    instanceDetailsName.textContent = name;
+    instanceDetailsStatus.textContent = 'Checking…';
+    instanceDetailsStatus.className = 'badge badge-warning';
+    logJournal('info', 'DETAILS', `Opening workspace for instance [${name}]`);
+    refreshInstanceDetails();
+  }
+
+  function closeInstanceDetails() {
+    instanceDetailsModal.classList.remove('active');
+    state.currentInstanceName = null;
+  }
+
+  // Close / interactions wiring
+  closeInstanceDetailsBtn.addEventListener('click', closeInstanceDetails);
+  instanceDetailsModal.addEventListener('click', (e) => {
+    if (e.target === instanceDetailsModal) closeInstanceDetails();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && instanceDetailsModal.classList.contains('active')) closeInstanceDetails();
+  });
+
+  // Instance modal tabs
+  document.querySelectorAll('.instance-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.instance-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.instance-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.getAttribute('data-instance-tab');
+      const panel = document.querySelector(`.instance-tab-panel[data-instance-panel="${tab}"]`);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // Quick actions
+  instanceConnectBtn.addEventListener('click', () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    const connected = (state.currentInstanceState || '').toLowerCase() === 'open';
+    if (connected) {
+      handleLogoutInstance(name);
+      setTimeout(refreshInstanceDetails, 800);
+    } else {
+      openQrModal(name);
+    }
+  });
+
+  instanceRestartBtn.addEventListener('click', () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    handleRestartInstance(name);
+    setTimeout(refreshInstanceDetails, 800);
+  });
+
+  instanceClearCacheBtn.addEventListener('click', async () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    instanceClearCacheBtn.disabled = true;
+    instanceClearCacheBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Clearing...';
+    const res = await apiRequest(`/instance/clearCache/${name}`, 'POST');
+    instanceClearCacheBtn.disabled = false;
+    instanceClearCacheBtn.innerHTML = '<i class="fa-solid fa-broom"></i> Clear Cache';
+    if (res.ok) {
+      showToast(`Cache cleared for "${name}".`);
+      logJournal('success', 'CLEAR_CACHE', `Cache cleared for instance [${name}].`);
+    } else {
+      showToast(`Clear cache failed: ${res.data?.response?.message || res.error || res.status}`, 'error');
+    }
+  });
+
+  instanceDeleteBtn.addEventListener('click', async () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    if (!confirm(`Permanently delete instance "${name}"? This cannot be undone.`)) return;
+    await handleDeleteInstance(name);
+    closeInstanceDetails();
+  });
+
+  // Direct message send from the active instance
+  instanceMessageSendBtn.addEventListener('click', async () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    const number = instanceMessageNumber.value.trim().replace(/\D/g, '');
+    const text = instanceMessageText.value.trim();
+    if (!number || !text) {
+      showToast('Please provide both recipient number and message.', 'error');
+      return;
+    }
+    instanceMessageSendBtn.disabled = true;
+    instanceMessageSendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+    const payload = { number, text, delay: 1200 };
+    const res = await apiRequest(`/message/sendText/${name}`, 'POST', payload);
+    instanceMessageSendBtn.disabled = false;
+    instanceMessageSendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send from this Instance';
+    if (res.ok) {
+      showToast(`Message dispatched via "${name}".`);
+      logJournal('success', 'DISPATCH', `Message sent via instance [${name}] to +${number}. Key: ${res.data?.key?.id || 'ack_200'}`);
+      instanceMessageText.value = '';
+    } else {
+      const err = res.data?.response?.message || res.data?.message || res.error || 'Failed to dispatch';
+      showToast(`Dispatch failed: ${err}`, 'error');
+    }
+  });
+
+  // Settings save → POST /settings/set/:instance
+  instanceSettingsSaveBtn.addEventListener('click', async () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    const prev = state.currentSettings || {};
+    const payload = {
+      rejectCall: instanceRejectCallsToggle.checked,
+      readMessages: instanceReadMessagesToggle.checked,
+      readStatus: instanceReadStatusToggle.checked,
+      syncFullHistory: instanceSyncFullHistoryToggle.checked,
+      groupsIgnore: typeof prev.groupsIgnore === 'boolean' ? prev.groupsIgnore : false,
+      alwaysOnline: typeof prev.alwaysOnline === 'boolean' ? prev.alwaysOnline : false
+    };
+    instanceSettingsSaveBtn.disabled = true;
+    instanceSettingsSaveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    const res = await apiRequest(`/settings/set/${name}`, 'POST', payload);
+    instanceSettingsSaveBtn.disabled = false;
+    instanceSettingsSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Settings';
+    if (res.ok) {
+      state.currentSettings = payload;
+      showToast(`Settings saved for "${name}".`);
+      logJournal('success', 'SETTINGS', `Settings updated for instance [${name}]: rejectCall=${payload.rejectCall}, readMessages=${payload.readMessages}, readStatus=${payload.readStatus}, syncFullHistory=${payload.syncFullHistory}`);
+    } else {
+      const err = res.data?.response?.message || res.data?.message || res.error || 'Failed to save settings';
+      showToast(`Settings save failed: ${err}`, 'error');
+      logJournal('error', 'SETTINGS', `Settings update failed for [${name}]: ${err}`);
+    }
+  });
+
+  // Webhook save → fork multi-webhook API (POST/PUT /instance/:name/webhooks/:id?)
+  instanceWebhookSaveBtn.addEventListener('click', async () => {
+    const name = state.currentInstanceName;
+    if (!name) return;
+    const url = instanceWebhookUrl.value.trim();
+    if (!url) {
+      showToast('Please provide a webhook URL.', 'error');
+      return;
+    }
+    const events = selectedWebhookEvents();
+    if (events.length === 0) {
+      showToast('Select at least one webhook event.', 'error');
+      return;
+    }
+    const payload = {
+      name: 'dashboard',
+      url,
+      enabled: instanceWebhookEnabledToggle.checked,
+      events,
+      timeoutMs: 60000,
+      maxAttempts: 3,
+      initialBackoffMs: 1000
+    };
+    instanceWebhookSaveBtn.disabled = true;
+    instanceWebhookSaveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    let res;
+    if (state.currentWebhookId) {
+      res = await apiRequest(`/instance/${encodeURIComponent(name)}/webhooks/${state.currentWebhookId}`, 'PUT', payload);
+    } else {
+      res = await apiRequest(`/instance/${encodeURIComponent(name)}/webhooks`, 'POST', payload);
+      if (res.ok && res.data) {
+        const created = res.data && res.data[0] ? res.data[0] : (res.data.destination || res.data);
+        state.currentWebhookId = created?.id || null;
+      }
+    }
+    instanceWebhookSaveBtn.disabled = false;
+    instanceWebhookSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Webhook';
+    if (res.ok) {
+      showToast(`Webhook configured for "${name}".`);
+      logJournal('success', 'WEBHOOK', `Webhook configured for instance [${name}]: ${events.length} events`);
+    } else {
+      const err = res.data?.response?.message || res.data?.message || res.data?.error || res.error || 'Failed to save webhook';
+      showToast(`Webhook save failed: ${err}`, 'error');
+      logJournal('error', 'WEBHOOK', `Webhook update failed for [${name}]: ${err}`);
+    }
+  });
+
+  renderWebhookEvents();
 
   // Message Studio - Live Preview typing
   messageTextInput.addEventListener('input', () => {

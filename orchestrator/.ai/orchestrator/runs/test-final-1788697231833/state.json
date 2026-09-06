@@ -1,0 +1,107 @@
+{
+  "taskId": "task",
+  "runId": "test-final-1788697231833",
+  "state": "BLOCKED",
+  "attempt": 1,
+  "fixCycle": 0,
+  "reviewCycle": 1,
+  "consecutiveFailures": 0,
+  "currentModel": "opencode/nemotron-3-ultra-free",
+  "sessionId": "sess-1",
+  "startedAt": "2026-09-06T12:20:32.544Z",
+  "updatedAt": "2026-09-06T12:20:45.500Z",
+  "taskFile": "C:\\Users\\ahmed\\Desktop\\auto\\orchestrator\\.ai\\orchestrator\\test-final\\task.md",
+  "taskText": "# Integration Test Task\n\nCreate a file at integration-output/test.txt with content \"orchestrator works\".\n\n## Acceptance Criteria\n\n- [ ] File created at integration-output/test.txt\n- [ ] Content is exactly \"orchestrator works\"\n---\nSimple task: just create the file and verify it exists.\n",
+  "acceptanceCriteria": [
+    "[ ] File created at integration-output/test.txt",
+    "[ ] Content is exactly \"orchestrator works\""
+  ],
+  "findings": [],
+  "tests": [
+    {
+      "name": "typecheck",
+      "command": [
+        "npm.cmd",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 4187,
+      "outputTail": "\n> ai-coding-orchestrator@1.0.0 typecheck\n> tsc --noEmit -p tsconfig.json\n\n"
+    },
+    {
+      "name": "lint",
+      "command": [],
+      "exitCode": null,
+      "status": "SKIPPED",
+      "durationMs": 0,
+      "outputTail": "",
+      "skippedReason": "no eslint setup detected"
+    },
+    {
+      "name": "tests",
+      "command": [
+        "npm.cmd",
+        "test",
+        "--silent"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 3426,
+      "outputTail": "(node:16668) Warning: node:test run() is being called recursively within a test file. skipping running files.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+    },
+    {
+      "name": "build",
+      "command": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "durationMs": 3067,
+      "outputTail": "\n> ai-coding-orchestrator@1.0.0 build\n> tsc -p tsconfig.json\n\n"
+    }
+  ],
+  "history": [
+    {
+      "state": "DISCOVER",
+      "at": "2026-09-06T12:20:32.544Z",
+      "note": "run created"
+    },
+    {
+      "state": "PLAN",
+      "at": "2026-09-06T12:20:32.551Z",
+      "note": "planning"
+    },
+    {
+      "state": "IMPLEMENT",
+      "at": "2026-09-06T12:20:32.555Z",
+      "note": "plan complete"
+    },
+    {
+      "state": "TEST",
+      "at": "2026-09-06T12:20:33.941Z",
+      "note": "implementation done"
+    },
+    {
+      "state": "REVIEW",
+      "at": "2026-09-06T12:20:44.628Z",
+      "note": "tests complete"
+    },
+    {
+      "state": "BLOCKED",
+      "at": "2026-09-06T12:20:45.500Z",
+      "note": "reviewer unavailable; cannot certify"
+    }
+  ],
+  "modelsUsed": [
+    "opencode/nemotron-3-ultra-free"
+  ],
+  "fallbacks": [],
+  "gitHead": "0c910b4c9a2aacce98a1e84df0b988cef24e45b7",
+  "gitBranch": "master",
+  "openCodePid": null,
+  "finalized": false
+}

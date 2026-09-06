@@ -180,6 +180,7 @@ function normalizeConfig(raw: unknown): OrchestratorConfig {
   if (typeof review["executable"] === "string") cfg.review.executable = review["executable"] as string;
   if (Array.isArray(review["args"])) cfg.review.args = (review["args"] as unknown[]).map(String);
   if (typeof review["timeoutMs"] === "number") cfg.review.timeoutMs = review["timeoutMs"] as number;
+  if (typeof review["failOnUnavailable"] === "boolean") cfg.review.failOnUnavailable = review["failOnUnavailable"] as boolean;
 
   const quality = (r["quality"] ?? {}) as Record<string, unknown>;
   cfg.quality.typecheck = asBool(quality["typecheck"], cfg.quality.typecheck);
@@ -249,6 +250,21 @@ export function applyEnvOverrides(cfg: OrchestratorConfig): OrchestratorConfig {
   const n3 = num("ORCH_MODEL_COOLDOWN_MS"); if (n3 !== undefined) out.orchestrator.modelCooldownMs = n3;
   if (process.env["ORCH_REVIEW_EXEC"]) out.review.executable = process.env["ORCH_REVIEW_EXEC"] as string;
   if (process.env["ORCH_REVIEW_MODEL"]) out.review.model = process.env["ORCH_REVIEW_MODEL"] as string;
+  if (process.env["ORCH_REVIEW_ARGS"]) {
+    const rawArgs = process.env["ORCH_REVIEW_ARGS"] as string;
+    try {
+      const parsed: unknown = JSON.parse(rawArgs);
+      if (Array.isArray(parsed)) out.review.args = (parsed as unknown[]).map(String);
+      else out.review.args = rawArgs.split(/\s+/).filter(Boolean);
+    } catch {
+      out.review.args = rawArgs.split(/\s+/).filter(Boolean);
+    }
+  }
+  const reviewTimeout = num("ORCH_REVIEW_TIMEOUT_MS");
+  if (reviewTimeout !== undefined) out.review.timeoutMs = reviewTimeout;
+  if (process.env["ORCH_REVIEW_FAIL_ON_UNAVAILABLE"] === "1" || process.env["ORCH_REVIEW_FAIL_ON_UNAVAILABLE"] === "true") {
+    out.review.failOnUnavailable = true;
+  }
   if (process.env["ORCH_AUTO_COMMIT"] === "1" || process.env["ORCH_AUTO_COMMIT"] === "true") {
     out.orchestrator.autoCommit = true; out.git.autoCommit = true;
   }

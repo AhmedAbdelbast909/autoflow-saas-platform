@@ -2,7 +2,7 @@ import { execFileSafe, spawnSafe } from "./proc.js";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { redactSecrets } from "./secrets.js";
-import type { Reviewer, ReviewFinding, ReviewInput, ReviewResult } from "./types.js";
+import type { Reviewer, ReviewFinding, ReviewInput, ReviewResult, ReviewStatus } from "./types.js";
 
 export function reviewerPrompt(input: ReviewInput): string {
   return `# Independent code review (orchestrated)
@@ -47,7 +47,10 @@ export function parseReviewJson(raw: string): ReviewResult {
     throw new Error("Reviewer did not return JSON object");
   }
   const obj = JSON.parse(cleaned.slice(start, end + 1)) as Record<string, unknown>;
-  if (obj["status"] !== "PASS" && obj["status"] !== "FAIL") throw new Error('Reviewer JSON missing status "PASS"|"FAIL"');
+  const validStatuses: ReviewStatus[] = ["PASS", "FAIL", "UNAVAILABLE"];
+  if (!validStatuses.includes(obj["status"] as ReviewStatus)) {
+    throw new Error(`Reviewer JSON missing valid status "PASS"|"FAIL"|"UNAVAILABLE", got: ${String(obj["status"])}`);
+  }
   const findingsRaw = Array.isArray(obj["findings"]) ? obj["findings"] : [];
   const findings: ReviewFinding[] = findingsRaw.map((f, i) => {
     const r = f as Record<string, unknown>;
@@ -63,7 +66,7 @@ export function parseReviewJson(raw: string): ReviewResult {
     };
   });
   return {
-    status: obj["status"] as "PASS" | "FAIL",
+    status: obj["status"] as ReviewStatus,
     summary: String(obj["summary"] ?? ""),
     findings,
     required_actions: Array.isArray(obj["required_actions"]) ? (obj["required_actions"] as unknown[]).map(String) : [],
@@ -78,12 +81,27 @@ export interface DeepSeekHarnessOptions {
   timeoutMs: number;
   reviewDir: string;
   runId: string;
+  failOnUnavailable?: boolean;
 }
 
 export class DeepSeekHarnessReviewer implements Reviewer {
   constructor(private opts: DeepSeekHarnessOptions) {}
 
   async review(input: ReviewInput): Promise<ReviewResult> {
+    const executableFound = await reviewerExecutableExists(this.opts.executable);
+    if (!executableFound) {
+      if (this.opts.failOnUnavailable) {
+        throw new Error(`Reviewer executable not found: "${this.opts.executable}". Install/configure the DeepSeek Harness or set review.executable (ORCH_REVIEW_EXEC).`);
+      }
+      return {
+        status: "UNAVAILABLE",
+        summary: `Reviewer executable "${this.opts.executable}" not found in PATH. Review skipped.`,
+        findings: [],
+        required_actions: [`Install/configure DeepSeek Harness (executable: ${this.opts.executable})`],
+        rawOutput: "",
+      };
+    }
+
     const prompt = reviewerPrompt(input);
     const promptFile = join(this.opts.reviewDir, `review-prompt-${input.changedFiles.length}files.md`);
     await writeFile(promptFile, prompt, "utf8").catch(() => undefined);
@@ -98,10 +116,6 @@ export class DeepSeekHarnessReviewer implements Reviewer {
   }
 
   private spawnReviewer(args: string[], prompt: string): Promise<string> {
-    // NOTE: some harnesses read the prompt from stdin, others from a --file/positional
-    // arg. We pass stdin AND append no extra positional args to avoid inventing flags.
-    // If the configured harness needs the prompt as a file, set review.args to include
-    // a placeholder — currently stdin delivery only.
     return new Promise((resolve, reject) => {
       const child = spawnSafe(this.opts.executable, args, { timeout: this.opts.timeoutMs });
       let out = "";
@@ -113,15 +127,11 @@ export class DeepSeekHarnessReviewer implements Reviewer {
       }, this.opts.timeoutMs);
       child.on("error", (err) => {
         clearTimeout(timer);
-        reject(new Error(`Reviewer executable not found or failed to start: "${this.opts.executable}" (${(err as Error).message}). Install/configure the DeepSeek Harness or set review.executable (ORCH_REVIEW_EXEC).`));
+        reject(new Error(`Reviewer executable failed to start: "${this.opts.executable}" (${(err as Error).message}). Please install/configure the reviewer executable (e.g. DeepSeek Harness or OpenCode).`));
       });
       child.on("close", (code) => {
         clearTimeout(timer);
         if (code === 0) { resolve(out); return; }
-        if (/ENOENT|not recognized|not found/i.test(out)) {
-          reject(new Error(`Reviewer executable not found: "${this.opts.executable}". Install/configure the DeepSeek Harness or set review.executable (ORCH_REVIEW_EXEC).`));
-          return;
-        }
         reject(new Error(`Reviewer failed (exit ${code}): ${redactSecrets(out).slice(-2000)}`));
       });
       try {

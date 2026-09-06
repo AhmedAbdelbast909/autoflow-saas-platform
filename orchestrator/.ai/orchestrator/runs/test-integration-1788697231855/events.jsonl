@@ -1,0 +1,4 @@
+{"type":"RUN_STARTED","timestamp":"2026-09-06T12:20:32.552Z","runId":"test-integration-1788697231855","taskId":"task"}
+{"type":"PLAN_CREATED","timestamp":"2026-09-06T12:20:32.560Z"}
+{"type":"MODEL_SELECTED","timestamp":"2026-09-06T12:20:32.563Z","model":"opencode/nemotron-3-ultra-free","id":"coding-primary"}
+{"type":"OPENCODE_STARTED","timestamp":"2026-09-06T12:20:33.188Z","model":"opencode/nemotron-3-ultra-free","attempt":1}

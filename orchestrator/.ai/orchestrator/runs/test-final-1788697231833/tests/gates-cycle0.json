@@ -1,0 +1,47 @@
+[
+  {
+    "name": "typecheck",
+    "command": [
+      "npm.cmd",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "durationMs": 4187,
+    "outputTail": "\n> ai-coding-orchestrator@1.0.0 typecheck\n> tsc --noEmit -p tsconfig.json\n\n"
+  },
+  {
+    "name": "lint",
+    "command": [],
+    "exitCode": null,
+    "status": "SKIPPED",
+    "durationMs": 0,
+    "outputTail": "",
+    "skippedReason": "no eslint setup detected"
+  },
+  {
+    "name": "tests",
+    "command": [
+      "npm.cmd",
+      "test",
+      "--silent"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "durationMs": 3426,
+    "outputTail": "(node:16668) Warning: node:test run() is being called recursively within a test file. skipping running files.\n(Use `node --trace-warnings ...` to show where the warning was created)\n"
+  },
+  {
+    "name": "build",
+    "command": [
+      "npm.cmd",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "status": "PASS",
+    "durationMs": 3067,
+    "outputTail": "\n> ai-coding-orchestrator@1.0.0 build\n> tsc -p tsconfig.json\n\n"
+  }
+]
