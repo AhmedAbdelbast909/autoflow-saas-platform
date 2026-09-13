@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "instanceId": "cad13cd8-d879-499a-b471-25eba85ceec3",
+  "pid": 2424,
+  "startedAt": "2026-09-07T17:26:45.426Z",
+  "lastHeartbeatAt": "2026-09-07T19:12:09.489Z",
+  "cleanShutdown": false,
+  "activeWorkflowId": "e72c8e7a-611e-4351-9a3b-c604b61c4268",
+  "restartCount": 0
+}

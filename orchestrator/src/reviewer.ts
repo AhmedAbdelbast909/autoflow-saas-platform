@@ -91,13 +91,13 @@ export class DeepSeekHarnessReviewer implements Reviewer {
     const executableFound = await reviewerExecutableExists(this.opts.executable);
     if (!executableFound) {
       if (this.opts.failOnUnavailable) {
-        throw new Error(`Reviewer executable not found: "${this.opts.executable}". Install/configure the DeepSeek Harness or set review.executable (ORCH_REVIEW_EXEC).`);
+        throw new Error(`Reviewer executable not found: "${this.opts.executable}". Install/configure the reviewer executable (default: opencode) or set review.executable (ORCH_REVIEW_EXEC).`);
       }
       return {
         status: "UNAVAILABLE",
         summary: `Reviewer executable "${this.opts.executable}" not found in PATH. Review skipped.`,
         findings: [],
-        required_actions: [`Install/configure DeepSeek Harness (executable: ${this.opts.executable})`],
+        required_actions: [`Install/configure reviewer executable (default: opencode, got: ${this.opts.executable})`],
         rawOutput: "",
       };
     }

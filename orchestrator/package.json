@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Autonomous AI coding orchestrator: OpenCode implementer + model fallback + quality gates + DeepSeek reviewer",
+  "description": "Autonomous AI coding orchestrator: OpenCode implementer + model fallback + quality gates + OpenCode reviewer",
   "engines": {
     "node": ">=20"
   },

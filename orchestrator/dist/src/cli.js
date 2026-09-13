@@ -187,7 +187,7 @@ async function cmdReviewers(configFlag) {
     console.log(`  Timeout:        ${config.review.timeoutMs ?? config.orchestrator.reviewerTimeoutMs}ms`);
     console.log(`  Available:      ${executableFound ? "YES" : "NO"}`);
     if (!executableFound) {
-        console.log(`  Note:           Reviewer not found in PATH. Set ORCH_REVIEW_EXEC or install DeepSeek Harness.`);
+        console.log(`  Note:           Reviewer not found in PATH. Set ORCH_REVIEW_EXEC or install the reviewer executable (default: opencode).`);
         console.log(`  Behavior:       Orchestrator will return UNAVAILABLE and block certification.`);
     }
     return executableFound ? 0 : 2;
